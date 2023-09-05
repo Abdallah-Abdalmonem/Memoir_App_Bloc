@@ -1,13 +1,12 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:memoir_app_bloc/constant/app_routes.dart';
-import 'package:memoir_app_bloc/helper/custom_snackbar.dart';
-import 'package:memoir_app_bloc/helper/toast_helper.dart';
+import 'package:memoir_app_bloc/features/auth/auth_cubit/auth_cubit.dart';
 
 import '../../../constant/app_image.dart';
+import '../../../constant/app_routes.dart';
+import '../../../helper/custom_snackbar.dart';
+import '../../../helper/toast_helper.dart';
 import '../../widgets/auth_continer.dart';
-import '../auth/auth_cubit.dart';
 
 class SigninScreen extends StatelessWidget {
   SigninScreen({super.key});

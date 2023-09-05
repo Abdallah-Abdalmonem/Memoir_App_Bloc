@@ -1,7 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constant/app_image.dart';
-import '../constant/app_keys.dart';
 
 class CacheHelper {
   static SharedPreferences? prefs;

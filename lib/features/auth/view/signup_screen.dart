@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:memoir_app_bloc/constant/app_routes.dart';
+import 'package:memoir_app_bloc/features/auth/auth_cubit/auth_cubit.dart';
 
 import '../../../constant/app_image.dart';
+import '../../../constant/app_routes.dart';
 import '../../../helper/custom_snackbar.dart';
 import '../../../helper/toast_helper.dart';
 import '../../widgets/auth_continer.dart';
-import '../auth/auth_cubit.dart';
 
 class SignupScreen extends StatelessWidget {
   SignupScreen({super.key});
@@ -29,9 +29,9 @@ class SignupScreen extends StatelessWidget {
           } else if (state is SignUpLoading) {
             CustomSnackBar(context, 'Please Wait...');
           } else if (state is SignUpFirebaseFailed) {
-            CustomSnackBar(context, state.errorMsg);
+            CustomSnackBarfailure(context, state.errorMsg);
           } else if (state is SignUpFailed) {
-            CustomSnackBar(context, state.errorMsg);
+            CustomSnackBarfailure(context, state.errorMsg);
           }
         },
         child: Scaffold(

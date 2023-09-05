@@ -29,7 +29,7 @@ class LoginFailed extends AuthState {
   LoginFailed(this.errorMsg);
 }
 
-// register
+// signUp
 
 class SignUpLoading extends AuthState {}
 

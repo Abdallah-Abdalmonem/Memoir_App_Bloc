@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
 import '../../constant/app_color.dart';
 import '../../constant/app_image.dart';
 import '../../constant/app_routes.dart';
 import '../../helper/toast_helper.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-
 import 'custom_button.dart';
 import 'custom_textfield.dart';
 

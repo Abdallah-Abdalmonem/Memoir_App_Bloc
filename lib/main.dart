@@ -2,11 +2,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:memoir_app_bloc/features/auth/cubit/auth_cubit.dart';
+import 'package:memoir_app_bloc/features/home/home_cubit/home_cubit.dart';
 
 import 'bloc_observer.dart';
 import 'constant/app_color.dart';
 import 'constant/app_routes.dart';
+import 'features/auth/auth_cubit/auth_cubit.dart';
 import 'firebase_options.dart';
 import 'helper/cache_helper.dart';
 
@@ -36,9 +37,9 @@ class MyApp extends StatelessWidget {
         BlocProvider<AuthCubit>(
           create: (BuildContext context) => AuthCubit(),
         ),
-        // BlocProvider<BlocB>(
-        //   create: (BuildContext context) => BlocB(),
-        // ),
+        BlocProvider<HomeCubit>(
+          create: (BuildContext context) => HomeCubit(),
+        ),
         // BlocProvider<BlocC>(
         //   create: (BuildContext context) => BlocC(),
         // ),
