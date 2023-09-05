@@ -19,14 +19,20 @@ class LoginSuccessfully extends AuthState {
 
 class LoginConfirmation extends AuthState {}
 
-class LoginFirebaseFailed extends AuthState {
-  final String errorMsg;
-  LoginFirebaseFailed(this.errorMsg);
-}
-
 class LoginFailed extends AuthState {
   final String errorMsg;
   LoginFailed(this.errorMsg);
+}
+
+// signin with google
+
+class SignINWithGoogleLoading extends AuthState {}
+
+class SignINWithGoogleSuccessfully extends AuthState {}
+
+class SignINWithGoogleFailed extends AuthState {
+  final String errorMsg;
+  SignINWithGoogleFailed(this.errorMsg);
 }
 
 // signUp
@@ -40,9 +46,4 @@ class SignUpSuccessfully extends AuthState {
 class SignUpFailed extends AuthState {
   final String errorMsg;
   SignUpFailed(this.errorMsg);
-}
-
-class SignUpFirebaseFailed extends AuthState {
-  final String errorMsg;
-  SignUpFirebaseFailed(this.errorMsg);
 }

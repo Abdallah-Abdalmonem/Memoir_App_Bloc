@@ -28,7 +28,7 @@ class SignupScreen extends StatelessWidget {
             ToastHelper.toastSuccess(msg: 'Please confirm your email');
           } else if (state is SignUpLoading) {
             CustomSnackBar(context, 'Please Wait...');
-          } else if (state is SignUpFirebaseFailed) {
+          } else if (state is SignUpFailed) {
             CustomSnackBarfailure(context, state.errorMsg);
           } else if (state is SignUpFailed) {
             CustomSnackBarfailure(context, state.errorMsg);

@@ -9,6 +9,14 @@ class CacheHelper {
     prefs = await SharedPreferences.getInstance();
   }
 
+  static Future setSignin() async {
+    await CacheHelper.prefs?.setBool('signin', true);
+  }
+
+  static bool? isSignin() {
+    return CacheHelper.prefs?.getBool('signin');
+  }
+
   static Future setProfileImageTemp() async {
     await CacheHelper.prefs
         ?.setString('image_profile_temp', AppImage.icon.toString());

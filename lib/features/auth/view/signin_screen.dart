@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:memoir_app_bloc/features/auth/auth_cubit/auth_cubit.dart';
+import 'package:memoir_app_bloc/features/home/home_cubit/home_cubit.dart';
+import 'package:memoir_app_bloc/helper/cache_helper.dart';
 
 import '../../../constant/app_image.dart';
 import '../../../constant/app_routes.dart';
@@ -24,16 +26,33 @@ class SigninScreen extends StatelessWidget {
         listener: (context, state) {
           if (state is LoginSuccessfully) {
             Navigator.of(context).pushReplacementNamed(AppRoutes.home);
+            CacheHelper.setSignin()
+                .then((value) => BlocProvider.of<HomeCubit>(context)
+                  ..getNotes()
+                  ..signinWithEmailAndPassword = true);
             ToastHelper.toastSuccess(msg: 'signin success!!');
-          } else if (state is LoginFirebaseFailed) {
+          }
+          if (state is LoginLoading) {
+            CustomSnackBar(context, 'Please Wait...');
+          }
+          if (state is LoginFailed) {
             CustomSnackBarfailure(context, state.errorMsg);
-          } else if (state is LoginConfirmation) {
+          }
+          if (state is LoginConfirmation) {
             CustomSnackBar(
                 context, 'Please check your email to confirm your account');
-          } else if (state is LoginLoading) {
-            CustomSnackBar(context, 'Please Wait...');
-          } else if (state is LoginFailed) {
+          }
+          if (state is SignINWithGoogleSuccessfully) {
+            Navigator.of(context).pushReplacementNamed(AppRoutes.home);
+            CacheHelper.setSignin().then(
+                (value) => BlocProvider.of<HomeCubit>(context).getNotes());
+            ToastHelper.toastSuccess(msg: 'signin success!!');
+          }
+          if (state is SignINWithGoogleFailed) {
             CustomSnackBarfailure(context, state.errorMsg);
+          }
+          if (state is SignINWithGoogleLoading) {
+            CustomSnackBar(context, 'Please Wait...');
           }
         },
         child: Scaffold(

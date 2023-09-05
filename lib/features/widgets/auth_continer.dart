@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:memoir_app_bloc/features/auth/auth_cubit/auth_cubit.dart';
 
 import '../../constant/app_color.dart';
 import '../../constant/app_image.dart';
@@ -186,16 +188,7 @@ class AuthContiner extends StatelessWidget {
           children: [
             InkWell(
               onTap: () async {
-                UserCredential? userCredential = await signInWithGoogle();
-                if (userCredential != null) {
-                  if (userCredential.user!.emailVerified) {
-                    ToastHelper.toastSuccess(
-                        msg:
-                            'Welcome ${userCredential.additionalUserInfo?.profile?['given_name']}');
-
-                    Navigator.of(context).pushReplacementNamed(AppRoutes.home);
-                  }
-                }
+                await BlocProvider.of<AuthCubit>(context).signInWithGoogle();
               },
               child: Container(
                 padding: const EdgeInsets.only(right: 10),
@@ -220,29 +213,5 @@ class AuthContiner extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  Future<UserCredential?>? signInWithGoogle() async {
-    try {
-      // Trigger the authentication flow
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-
-      // Obtain the auth details from the request
-      final GoogleSignInAuthentication? googleAuth =
-          await googleUser?.authentication;
-
-      // Create a new credential
-      final OAuthCredential credential = await GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken,
-      );
-
-      // Once signed in, return the UserCredential
-      return await FirebaseAuth.instance.signInWithCredential(credential);
-    } catch (e) {
-      print(e);
-      ToastHelper.toastfailure(msg: '$e');
-      return null;
-    }
   }
 }

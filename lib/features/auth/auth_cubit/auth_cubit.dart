@@ -1,6 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:memoir_app_bloc/helper/toast_helper.dart';
 
 import '../../../constant/app_image.dart';
 import '../../../helper/cache_helper.dart';
@@ -14,8 +17,6 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> signIn({required String email, required String password}) async {
     UserCredential? credential;
-    UserModel? userModel;
-
     try {
       emit(LoginLoading());
       credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -24,23 +25,17 @@ class AuthCubit extends Cubit<AuthState> {
       );
 
       if (credential.user!.emailVerified) {
-        if (credential.user?.metadata.creationTime ==
-            credential.user?.metadata.lastSignInTime) {
-          userModel = UserModel(
-              userId: FirebaseAuth.instance.currentUser?.uid,
-              displayName: CacheHelper.prefs?.getString('display_name'),
-              email: credential.user?.email,
-              image: AppImage.icon);
-          await UserService.uploadUserInformation(userModel: userModel);
+        if (credential.user?.photoURL == null) {
+          await credential.user
+              ?.updateDisplayName(CacheHelper.prefs?.getString('display_name'));
           await CacheHelper.prefs?.remove('display_name');
         }
-        await UserService.getUserInformation();
         emit(LoginSuccessfully());
       } else {
-        emit(LoginConfirmation());
+        ToastHelper.toastfailure(msg: 'EmailNotVerified');
       }
     } on FirebaseAuthException catch (e) {
-      emit(LoginFirebaseFailed(e.toString()));
+      emit(LoginFailed(e.toString()));
     } catch (e) {
       emit(LoginFailed(e.toString()));
     }
@@ -65,9 +60,49 @@ class AuthCubit extends Cubit<AuthState> {
         emit(SignUpSuccessfully());
       }
     } on FirebaseAuthException catch (e) {
-      emit(SignUpFirebaseFailed(e.toString()));
+      emit(SignUpFailed(e.toString()));
     } catch (e) {
       emit(SignUpFailed(e.toString()));
+    }
+  }
+
+  Future signinWithGoogle() async {
+    try {
+      emit(SignINWithGoogleLoading());
+      UserCredential? userCredential = await signInWithGoogle();
+      if (userCredential != null) {
+        if (userCredential.user!.emailVerified) {
+          emit(SignINWithGoogleSuccessfully());
+        } else {
+          ToastHelper.toastfailure(msg: 'EmailNotVerified');
+        }
+      }
+    } catch (e) {
+      emit(SignINWithGoogleFailed(e.toString()));
+    }
+  }
+
+  Future<UserCredential?>? signInWithGoogle() async {
+    try {
+      // Trigger the authentication flow
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication? googleAuth =
+          await googleUser?.authentication;
+
+      // Create a new credential
+      final OAuthCredential credential = await GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      // Once signed in, return the UserCredential
+      return await FirebaseAuth.instance.signInWithCredential(credential);
+    } catch (e) {
+      print(e);
+      ToastHelper.toastfailure(msg: '$e');
+      return null;
     }
   }
 }
