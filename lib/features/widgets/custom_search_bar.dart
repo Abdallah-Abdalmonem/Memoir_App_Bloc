@@ -6,7 +6,6 @@ import '../../models/note_model.dart';
 class CustomSearchDelegate extends SearchDelegate {
   CustomSearchDelegate({required this.notesList});
   List<NoteModel> notesList;
-  // List<NoteModel> notesList=[];
 
   @override
   List<Widget> buildActions(BuildContext context) {
@@ -37,7 +36,7 @@ class CustomSearchDelegate extends SearchDelegate {
   @override
   Widget buildResults(BuildContext context) {
     List<NoteModel> searchNote = [];
-    if (notesList.length < 1) {
+    if (notesList.isEmpty) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: const <Widget>[
@@ -55,7 +54,7 @@ class CustomSearchDelegate extends SearchDelegate {
           searchNote.add(notesList[i]);
         }
       }
-      if (searchNote.length < 1) {
+      if (searchNote.isEmpty) {
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: const [
@@ -78,7 +77,7 @@ class CustomSearchDelegate extends SearchDelegate {
               child: InkWell(
                 onTap: () {
                   Navigator.of(context).pushNamed(AppRoutes.noteScreen,
-                      arguments: notesList[index]);
+                      arguments: searchNote[index]);
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(
@@ -140,7 +139,7 @@ class CustomSearchDelegate extends SearchDelegate {
   @override
   Widget buildSuggestions(BuildContext context) {
     List<NoteModel> searchNote = [];
-    if (notesList.length < 1) {
+    if (notesList.isEmpty) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: const <Widget>[
@@ -156,7 +155,7 @@ class CustomSearchDelegate extends SearchDelegate {
           searchNote.add(notesList[i]);
         }
       }
-      if (searchNote.length < 1) {
+      if (searchNote.isEmpty) {
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: const [
@@ -179,7 +178,7 @@ class CustomSearchDelegate extends SearchDelegate {
               child: InkWell(
                 onTap: () {
                   Navigator.of(context).pushNamed(AppRoutes.noteScreen,
-                      arguments: notesList[index]);
+                      arguments: searchNote[index]);
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(

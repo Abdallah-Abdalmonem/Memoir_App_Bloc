@@ -44,40 +44,40 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBEM0HGcdw0Ggctq3KdeN4w1AhYxTa5CYo',
-    appId: '1:44448392554:web:0b5e05d2a7b33dbd90f113',
-    messagingSenderId: '44448392554',
-    projectId: 'memoir-app-68893',
-    authDomain: 'memoir-app-68893.firebaseapp.com',
-    storageBucket: 'memoir-app-68893.appspot.com',
-    measurementId: 'G-0RMRQY6RJD',
+    apiKey: 'AIzaSyDIaWwB0DPtAX82vOdAcbJR1m_AZfVIJyA',
+    appId: '1:740336409478:web:3fa8ca76c665fecaf1aa07',
+    messagingSenderId: '740336409478',
+    projectId: 'memoir-app-bloc',
+    authDomain: 'memoir-app-bloc.firebaseapp.com',
+    storageBucket: 'memoir-app-bloc.appspot.com',
+    measurementId: 'G-VZLQJMSQ4G',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyD42JsPTpE2-PJRH-iXbfbzKx2A4a1DIPA',
-    appId: '1:44448392554:android:624134d442d50d0690f113',
-    messagingSenderId: '44448392554',
-    projectId: 'memoir-app-68893',
-    storageBucket: 'memoir-app-68893.appspot.com',
+    apiKey: 'AIzaSyCarD69NMYylQAM7bM0HP4Nx7d72Irqo7g',
+    appId: '1:740336409478:android:28c54176f066b03ef1aa07',
+    messagingSenderId: '740336409478',
+    projectId: 'memoir-app-bloc',
+    storageBucket: 'memoir-app-bloc.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDxcmi8dNDAXkawv1AFvg2iJMxPm7_t8PM',
-    appId: '1:44448392554:ios:4ba722f92398805390f113',
-    messagingSenderId: '44448392554',
-    projectId: 'memoir-app-68893',
-    storageBucket: 'memoir-app-68893.appspot.com',
-    iosClientId: '44448392554-u86pk5qiocdqoc9vs0f0fgqt8iqvkb2a.apps.googleusercontent.com',
-    iosBundleId: 'com.example.memoirApp',
+    apiKey: 'AIzaSyCxqln6fIU3Czp1S2vrsjWkVDiUsOluUqE',
+    appId: '1:740336409478:ios:abe526253b08be24f1aa07',
+    messagingSenderId: '740336409478',
+    projectId: 'memoir-app-bloc',
+    storageBucket: 'memoir-app-bloc.appspot.com',
+    iosClientId: '740336409478-rua1qf9iel0mdidmev4ck2kclo0mbnl3.apps.googleusercontent.com',
+    iosBundleId: 'com.example.memoirAppBloc',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDxcmi8dNDAXkawv1AFvg2iJMxPm7_t8PM',
-    appId: '1:44448392554:ios:4ba722f92398805390f113',
-    messagingSenderId: '44448392554',
-    projectId: 'memoir-app-68893',
-    storageBucket: 'memoir-app-68893.appspot.com',
-    iosClientId: '44448392554-u86pk5qiocdqoc9vs0f0fgqt8iqvkb2a.apps.googleusercontent.com',
-    iosBundleId: 'com.example.memoirApp',
+    apiKey: 'AIzaSyCxqln6fIU3Czp1S2vrsjWkVDiUsOluUqE',
+    appId: '1:740336409478:ios:abe526253b08be24f1aa07',
+    messagingSenderId: '740336409478',
+    projectId: 'memoir-app-bloc',
+    storageBucket: 'memoir-app-bloc.appspot.com',
+    iosClientId: '740336409478-rua1qf9iel0mdidmev4ck2kclo0mbnl3.apps.googleusercontent.com',
+    iosBundleId: 'com.example.memoirAppBloc',
   );
 }

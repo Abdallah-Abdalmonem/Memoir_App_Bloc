@@ -37,6 +37,8 @@ class GetNoteSuccessfully extends HomeState {
   GetNoteSuccessfully(this.notesList);
 }
 
+class GetZeroNoteSuccessfully extends HomeState {}
+
 class GetNoteFailed extends HomeState {
   final String errorMsg;
   GetNoteFailed(this.errorMsg);
@@ -89,14 +91,4 @@ class UploadProfileImageSuccessfully extends HomeState {
 class UploadProfileImageFailed extends HomeState {
   final String errorMsg;
   UploadProfileImageFailed(this.errorMsg);
-}
-
-// refresh note
-class RefreshNoteLoading extends HomeState {}
-
-class RefreshNoteSuccessfully extends HomeState {}
-
-class RefreshNoteFailed extends HomeState {
-  final String errorMsg;
-  RefreshNoteFailed(this.errorMsg);
 }

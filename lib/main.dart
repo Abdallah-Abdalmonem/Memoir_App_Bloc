@@ -40,9 +40,6 @@ class MyApp extends StatelessWidget {
         BlocProvider<HomeCubit>(
           create: (BuildContext context) => HomeCubit(),
         ),
-        // BlocProvider<BlocC>(
-        //   create: (BuildContext context) => BlocC(),
-        // ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -50,7 +47,8 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: AppColor.primaryColor,
         ),
-        initialRoute: AppRoutes.signin,
+        initialRoute:
+            CacheHelper.isSignin() == false ? AppRoutes.signin : AppRoutes.home,
         routes: routes,
       ),
     );

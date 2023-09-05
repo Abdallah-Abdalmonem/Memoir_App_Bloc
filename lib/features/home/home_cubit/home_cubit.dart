@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:memoir_app_bloc/helper/cache_helper.dart';
 
 import '../../../helper/toast_helper.dart';
 import '../../../models/note_model.dart';
@@ -37,18 +38,10 @@ class HomeCubit extends Cubit<HomeState> {
   Color editColor = Colors.black;
 
   List<NoteModel> notesList = [];
-
+  bool isLoading = false;
   User? currentUser = FirebaseAuth.instance.currentUser;
   String? imageUrl;
   bool signinWithEmailAndPassword = false;
-
-  onInit() {
-    UserService.getUserInformation().then((value) {
-      if (value.length > 0) {
-        signinWithEmailAndPassword = true;
-      }
-    });
-  }
 
   Future<String?> getImageProfile() async {
     try {
@@ -74,12 +67,16 @@ class HomeCubit extends Cubit<HomeState> {
       List<NoteModel> response = await NoteService.getNotes();
       notesList = response;
 
-      if (response.length > 0) {
+      if (response.isNotEmpty) {
         print('get note');
         print(response.length);
+        emit(GetNoteSuccessfully(response));
         return response;
+      } else {
+        print('get note');
+        print(response.length);
+        emit(GetZeroNoteSuccessfully());
       }
-      emit(GetNoteSuccessfully(response));
     } catch (e) {
       emit(GetNoteFailed(e.toString()));
     }
@@ -93,7 +90,7 @@ class HomeCubit extends Cubit<HomeState> {
     try {
       emit(AddNoteLoading());
       NoteModel noteModel = NoteModel(
-        title: note,
+        title: title,
         note: note,
         color: selectedColor.toString(),
         createdOn: Timestamp.now(),
@@ -102,6 +99,7 @@ class HomeCubit extends Cubit<HomeState> {
       await NoteService.addNote(noteModel: noteModel).then((value) {
         emit(AddNoteSuccessfully());
       });
+      await getNotes();
     } catch (e) {
       emit(AddNoteFailed(e.toString()));
       ToastHelper.toastfailure(msg: e.toString());
@@ -111,27 +109,24 @@ class HomeCubit extends Cubit<HomeState> {
 
   Future<void> deleteNote(String noteId) async {
     try {
-      emit(DeleteNoteLoading());
       await NoteService.deleteNote(noteId);
-      emit(DeleteNoteSuccessfully());
+      await getNotes();
     } catch (e) {
-      emit(DeleteNoteFailed(e.toString()));
+      ToastHelper.toastfailure(msg: e.toString());
     }
   }
 
   Future<void> deleteAllNote() async {
     try {
       if (notesList.isNotEmpty) {
-        emit(DeleteNoteLoading());
         await NoteService.deleteAllNote();
         notesList.clear();
-        // await getNotes();
-        emit(DeleteNoteSuccessfully());
+        await getNotes();
       } else {
         ToastHelper.toastfailure(msg: 'There is no notes');
       }
     } catch (e) {
-      emit(DeleteNoteFailed(e.toString()));
+      ToastHelper.toastfailure(msg: e.toString());
     }
   }
 
@@ -145,17 +140,17 @@ class HomeCubit extends Cubit<HomeState> {
       noteModel = NoteModel(
         userId: FirebaseAuth.instance.currentUser?.uid,
         noteId: oldNoteModel.noteId,
-        title: editTitle,
-        note: editNote,
+        title: editTitle.isEmpty ? oldNoteModel.title : editTitle,
+        note: editNote.isEmpty ? oldNoteModel.note : editNote,
         color: editColor.toString(),
         createdOn: oldNoteModel.createdOn,
         editOn: Timestamp.now(),
       );
       await NoteService.editNote(
           noteId: oldNoteModel.noteId.toString(), noteModel: noteModel);
-      emit(EditNoteSuccessfully());
+      await getNotes();
     } catch (e) {
-      emit(EditNoteFailed(e.toString()));
+      ToastHelper.toastfailure(msg: e.toString());
     }
   }
 
@@ -208,11 +203,10 @@ class HomeCubit extends Cubit<HomeState> {
 
   Future<void> refreshScreen() async {
     try {
-      emit(RefreshNoteLoading());
-      await Future.delayed(const Duration(seconds: 2), () => getNotes());
-      emit(RefreshNoteSuccessfully());
+      emit(GetNoteLoading());
+      await Future.delayed(const Duration(seconds: 1), () => getNotes());
     } catch (e) {
-      emit(RefreshNoteFailed(e.toString()));
+      ToastHelper.toastfailure(msg: e.toString());
     }
   }
 }

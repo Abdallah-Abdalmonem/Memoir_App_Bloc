@@ -22,11 +22,12 @@ class HomeScreen extends StatelessWidget {
   final TextEditingController noteEditingController = TextEditingController();
 
   GlobalKey<FormState> homeKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     final cubit = BlocProvider.of<HomeCubit>(context);
     return Scaffold(
-        drawer: drawerBuilder(context),
+        drawer: drawerBuilder(cubit, context),
         backgroundColor: Colors.white,
         appBar: appBarBuilder(cubit, context),
         body: Padding(
@@ -41,84 +42,73 @@ class HomeScreen extends StatelessWidget {
                 physics: const BouncingScrollPhysics(),
                 child: Form(
                     key: homeKey,
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 10),
-                        CustomTextFormField(
-                            validator: (value) {
-                              if (value!.isEmpty) {
-                                titleEditingController.text = 'No Title';
-                              }
-                              return null;
-                            },
-                            hintText: 'Title',
-                            textController: titleEditingController),
-                        const SizedBox(height: 10),
-                        CustomTextFormField(
-                            validator: (value) {
-                              if (value!.isEmpty) {
-                                return 'Can\'t be Empty';
-                              }
-                              return null;
-                            },
-                            sizeHeight: 30,
-                            hintText: 'Note',
-                            textController: noteEditingController),
-                        CustomSelectColorBuilder(),
-                        ElevatedButton(
-                          onPressed: () async {
-                            if (homeKey.currentState!.validate()) {
-                              await cubit.addNote(
-                                  title: titleEditingController.text,
-                                  note: noteEditingController.text);
-
-                              FocusManager.instance.primaryFocus?.unfocus();
-                            }
-                          },
-                          child: const Text('Add Note'),
-                        ),
-                        const SizedBox(height: 6),
-                        BlocBuilder<HomeCubit, HomeState>(
-                            builder: (context, state) => FutureBuilder(
-                                future: cubit.getNotes(),
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasData) {
-                                    return viewGridView(snapshot, cubit);
-                                  } else if (cubit.notesList.isEmpty) {
-                                    return SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        height:
-                                            MediaQuery.of(context).size.height /
-                                                2,
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Image.asset(AppImage.icon,
-                                                scale: 2),
-                                            const SizedBox(height: 5),
-                                            const Text('There is no notes',
-                                                textScaleFactor: 1.5)
-                                          ],
-                                        ));
-                                  } else if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        height:
-                                            MediaQuery.of(context).size.height /
-                                                2,
-                                        child: const Center(
-                                            child:
-                                                CircularProgressIndicator()));
+                    child: BlocBuilder<HomeCubit, HomeState>(
+                      builder: (context, state) {
+                        return Column(
+                          children: [
+                            const SizedBox(height: 10),
+                            CustomTextFormField(
+                                hintText: 'Title',
+                                textController: titleEditingController),
+                            const SizedBox(height: 10),
+                            CustomTextFormField(
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return 'Can\'t be Empty';
                                   }
-                                  return const Text('Error!!',
-                                      style: TextStyle(
-                                          fontSize: 24, color: Colors.red));
-                                }))
-                      ],
+                                  return null;
+                                },
+                                sizeHeight: 30,
+                                hintText: 'Note',
+                                textController: noteEditingController),
+                            CustomSelectColorBuilder(),
+                            ElevatedButton(
+                              onPressed: () async {
+                                if (homeKey.currentState!.validate()) {
+                                  await cubit.addNote(
+                                      title: titleEditingController.text.isEmpty
+                                          ? 'No Title'
+                                          : titleEditingController.text,
+                                      note: noteEditingController.text);
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                                }
+                              },
+                              child: const Text('Add Note'),
+                            ),
+                            const SizedBox(height: 6),
+                            if (state is GetNoteSuccessfully)
+                              viewGridView(state.notesList, cubit),
+                            if (state is GetZeroNoteSuccessfully)
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width,
+                                height: MediaQuery.of(context).size.height / 2,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(AppImage.icon, scale: 2),
+                                    const SizedBox(height: 5),
+                                    const Text('There is no notes',
+                                        textScaleFactor: 1.5)
+                                  ],
+                                ),
+                              ),
+                            if (state is GetNoteLoading)
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width,
+                                height: MediaQuery.of(context).size.height / 2,
+                                child: const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
+                            if (state is GetNoteFailed)
+                              const Center(
+                                child: const Text('Error!!',
+                                    style: TextStyle(
+                                        fontSize: 24, color: Colors.red)),
+                              ),
+                          ],
+                        );
+                      },
                     ))),
           ),
         ));
@@ -129,16 +119,11 @@ AppBar appBarBuilder(HomeCubit cubit, BuildContext context) {
   return AppBar(
       leading: Builder(builder: (context) {
         return IconButton(
-          icon: const Icon(
-            Icons.menu,
-            color: Colors.black,
-            size: 30,
-          ),
-          onPressed: () {
-            Scaffold.of(context).openDrawer();
-          },
-          tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-        );
+            icon: const Icon(Icons.menu, color: Colors.black, size: 30),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+            tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip);
       }),
       titleSpacing: 5,
       centerTitle: true,
@@ -149,13 +134,13 @@ AppBar appBarBuilder(HomeCubit cubit, BuildContext context) {
       elevation: 0,
       actions: [
         IconButton(
-            onPressed: () async {
-              await showSearch(
+          onPressed: () async {
+            await showSearch(
                 context: context,
-                delegate: CustomSearchDelegate(notesList: cubit.notesList),
-              );
-            },
-            icon: const Icon(Icons.search, color: Colors.black)),
+                delegate: CustomSearchDelegate(notesList: cubit.notesList));
+          },
+          icon: const Icon(Icons.search, color: Colors.black),
+        ),
         PopupMenuButton(
           icon: const Icon(Icons.more_vert, color: Colors.black),
           onSelected: (value) async {
@@ -177,8 +162,8 @@ AppBar appBarBuilder(HomeCubit cubit, BuildContext context) {
       ]);
 }
 
-Drawer drawerBuilder(BuildContext context) {
-  final cubit = BlocProvider.of<HomeCubit>(context);
+Drawer drawerBuilder(HomeCubit cubit, BuildContext context) {
+  // final cubit = BlocProvider.of<HomeCubit>(context);
   return Drawer(
     child: Column(
       children: [
@@ -189,60 +174,58 @@ Drawer drawerBuilder(BuildContext context) {
                   image: AssetImage(AppImage.backgroundAuth))),
           child: GestureDetector(
             onLongPress: () async {
-              if (cubit.imageUrl != null && cubit.signinWithEmailAndPassword) {
-                showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                          title: const Text('Delete photo'),
-                          content: const Text('Do you want to delete photo?'),
-                          actions: [
-                            CustomButton(
-                                textButton: 'Delete',
-                                colorButton: Colors.red,
-                                onPressed: () async {
-                                  await cubit.removeProfileImage().then(
-                                      (value) => Navigator.of(context).pop());
-                                }),
-                            CustomButton(
-                                textButton: 'Cancel',
-                                colorText: Colors.black,
-                                colorButton: Colors.white,
-                                onPressed: () => Navigator.of(context).pop())
-                          ],
-                        )
-                    // buttonColor: AppColor.primaryColor,
-                    // cancelTextColor: Colors.red,
-                    // confirmTextColor: Colors.white,
-                    );
-              } else if (cubit.signinWithEmailAndPassword) {
-                ToastHelper.toastfailure(
-                    msg: 'You should signin without gmail');
-              } else {
-                ToastHelper.toastfailure(
-                    msg: 'You should choose photo to delete it');
-              }
+              // if (cubit.imageUrl != null && cubit.signinWithEmailAndPassword) {
+              //   showDialog(
+              //       context: context,
+              //       builder: (context) => AlertDialog(
+              //             title: const Text('Delete photo'),
+              //             content: const Text('Do you want to delete photo?'),
+              //             actions: [
+              //               CustomButton(
+              //                   textButton: 'Delete',
+              //                   colorButton: Colors.red,
+              //                   onPressed: () async {
+              //                     await cubit.removeProfileImage().then(
+              //                         (value) => Navigator.of(context).pop());
+              //                   }),
+              //               CustomButton(
+              //                   textButton: 'Cancel',
+              //                   colorText: Colors.black,
+              //                   colorButton: Colors.white,
+              //                   onPressed: () => Navigator.of(context).pop())
+              //             ],
+              //           )
+              //       // buttonColor: AppColor.primaryColor,
+              //       // cancelTextColor: Colors.red,
+              //       // confirmTextColor: Colors.white,
+              //       );
+              // } else if (cubit.signinWithEmailAndPassword == false) {
+              //   ToastHelper.toastfailure(
+              //       msg: 'You should signin without gmail');
+              // } else {
+              //   ToastHelper.toastfailure(
+              //       msg: 'You should choose photo to delete it');
+              // }
             },
             onTap: () async {
-              if (FirebaseAuth.instance.currentUser?.photoURL != null) {
-                // signin with gmail
-
-                Navigator.of(context).pushNamed(AppRoutes.imageScreen,
-                    arguments: FirebaseAuth.instance.currentUser!.photoURL);
-              }
-              if (cubit.imageUrl == null) {
-              } else if (cubit.imageUrl != null &&
-                  cubit.signinWithEmailAndPassword) {
-                // there is image
-
-                Navigator.of(context).pushNamed(AppRoutes.imageScreen,
-                    arguments: cubit.imageUrl);
-              } else {
-                // default image
-
-                Navigator.of(context)
-                    .pushNamed(AppRoutes.imageScreen, arguments: null);
-              }
+              // if (FirebaseAuth.instance.currentUser?.photoURL != null) {
+              //   // signin with gmail
+              //   Navigator.of(context).pushNamed(AppRoutes.imageScreen,
+              //       arguments: FirebaseAuth.instance.currentUser!.photoURL);
+              // }
+              // if (cubit.imageUrl == null) {
+              // } else if (cubit.imageUrl != null &&
+              //     cubit.signinWithEmailAndPassword) {
+              //   // there is image
+              //   Navigator.of(context).pushNamed(AppRoutes.imageScreen,
+              //       arguments: cubit.imageUrl);
+              // } else {
+              //   // default image
+              //   Navigator.of(context)
+              //       .pushNamed(AppRoutes.imageScreen, arguments: null);
+              // }
             },
+            /*
             child: CircleAvatar(
               radius: double.infinity,
               child: BlocBuilder<HomeCubit, HomeState>(
@@ -274,6 +257,7 @@ Drawer drawerBuilder(BuildContext context) {
                 },
               ),
             ),
+          */
           ),
         ),
         SizedBox(
@@ -283,21 +267,11 @@ Drawer drawerBuilder(BuildContext context) {
             elevation: 8,
             margin: const EdgeInsets.all(8),
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: FutureBuilder(
-                future: UserService.getUserInformation(),
-                builder: (BuildContext context, AsyncSnapshot snapshot) {
-                  if (snapshot.hasData) {
-                    return Text(
-                        textScaleFactor: 1.2,
-                        'Name: ${cubit.signinWithEmailAndPassword ? snapshot.data[0].displayName : cubit.currentUser?.displayName}',
-                        style: const TextStyle(fontSize: 20));
-                  } else {
-                    return const Text('Loading...');
-                  }
-                },
-              ),
-            ),
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                    textScaleFactor: 1.2,
+                    'Name: ${cubit.currentUser?.displayName}',
+                    style: const TextStyle(fontSize: 20))),
           ),
         ),
         SizedBox(
@@ -415,11 +389,10 @@ Column viewCamera(HomeCubit cubit, BuildContext context) {
   );
 }
 
-MasonryGridView viewGridView(
-    AsyncSnapshot<List<NoteModel>?> snapshot, HomeCubit cubit) {
+MasonryGridView viewGridView(List<NoteModel>? snapshot, HomeCubit cubit) {
   return MasonryGridView.builder(
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: snapshot.data?.length,
+      itemCount: snapshot?.length,
       shrinkWrap: true,
       scrollDirection: Axis.vertical,
       crossAxisSpacing: 16,
@@ -427,7 +400,7 @@ MasonryGridView viewGridView(
       gridDelegate: const SliverSimpleGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2),
       itemBuilder: (context, index) => CustomListTile(
-          listTileColor: Color(int.parse('${snapshot.data?[index].color}')),
+          listTileColor: Color(int.parse('${snapshot?[index].color}')),
           cubit: cubit,
           index: index));
 }
@@ -549,97 +522,97 @@ class CustomListTile extends StatelessWidget {
     final TextEditingController editNoteEditingController =
         TextEditingController();
 
-    //  editTitleEditingController.text =
-    //     '${controller.notesList[index].title}';
-    // controller.editNoteEditingController.text =
-    //     '${controller.notesList[index].note}';
     cubit.editColor = cubit.colorList[index];
     ValueNotifier<Color> selectColor =
         ValueNotifier<Color>(cubit.selectedColor);
-
-    // Get.dialog(
-    //   barrierDismissible: false,
-    //   SimpleDialog(
-    //     contentPadding: const EdgeInsets.all(15),
-    //     title: Row(
-    //       mainAxisAlignment: MainAxisAlignment.center,
-    //       children: [
-    //         const Spacer(),
-    //         const Text(
-    //           'Edit Note',
-    //           style: TextStyle(
-    //             fontSize: 26,
-    //             decoration: TextDecoration.underline,
-    //           ),
-    //         ),
-    //         const Spacer(),
-    //         InkWell(
-    //             onTap: () {
-    //               Navigator.of(context).pop();
-    //             },
-    //             child: const Icon(Icons.clear))
-    //       ],
-    //     ),
-    //     children: [
-    //       CustomTextFormField(
-    //         initialValue: controller.notesList[index].title,
-    //         onChange: (value) {
-    //           if (value.isEmpty || value == null || value == '') {
-    //             controller.editTitleEditingController.text =
-    //                 '${controller.notesList[index].title}';
-    //           } else {
-    //             controller.editTitleEditingController.text = value;
-    //           }
-    //         },
-    //       ),
-    //       const SizedBox(height: 20),
-    //       CustomTextFormField(
-    //           initialValue: controller.notesList[index].note,
-    //           onChange: (value) {
-    //             if (value.isEmpty || value == null || value == '') {
-    //               controller.editNoteEditingController.text =
-    //                   '${controller.notesList[index].note}';
-    //             } else {
-    //               controller.editNoteEditingController.text = value;
-    //             }
-    //           },
-    //           maxLines: 10),
-    //       const SizedBox(height: 20),
-    //       SizedBox(
-    //         height: 100,
-    //         width: 100,
-    //         child: GridView.builder(
-    //           physics: const NeverScrollableScrollPhysics(),
-    //           shrinkWrap: true,
-    //           itemCount: cubit.colorList.length,
-    //           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-    //               crossAxisCount: 6),
-    //           itemBuilder: (context, index) => GestureDetector(
-    //             onTap: () {
-    //               cubit.editColor = cubit.colorList[index];
-    //               selectColor.value = cubit.colorList[index];
-    //             },
-    //             child: Container(
-    //               color: Colors.white,
-    //               padding: const EdgeInsets.all(8.0),
-    //               child: CustomCircleAvatar(
-    //                 index: index,
-    //                 selectColor: selectColor,
-    //                 colorList: cubit.colorList,
-    //               ),
-    //             ),
-    //           ),
-    //         ),
-    //       ),
-    //       CustomButton(
-    //           onPressed: () async {
-    //             await cubit.editNote(cubit.notesList[index]);
-    //             Navigator.of(context).pop();
-    //           },
-    //           textButton: 'Save Changes'),
-    //     ],
-    //   ),
-    // );
+    showDialog(
+      context: context,
+      builder: (context) =>
+          // barrierDismissible: false,
+          SimpleDialog(
+        contentPadding: const EdgeInsets.all(15),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Spacer(),
+            const Text(
+              'Edit Note',
+              style: TextStyle(
+                fontSize: 26,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+            const Spacer(),
+            InkWell(
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Icon(Icons.clear))
+          ],
+        ),
+        children: [
+          CustomTextFormField(
+            initialValue: cubit.notesList[index].title,
+            onChange: (value) {
+              if (value.isEmpty || value == null || value == '') {
+                editTitleEditingController.text =
+                    '${cubit.notesList[index].title}';
+              } else {
+                editTitleEditingController.text = value;
+              }
+            },
+          ),
+          const SizedBox(height: 20),
+          CustomTextFormField(
+              initialValue: cubit.notesList[index].note,
+              onChange: (value) {
+                if (value.isEmpty || value == null || value == '') {
+                  editNoteEditingController.text =
+                      '${cubit.notesList[index].note}';
+                } else {
+                  editNoteEditingController.text = value;
+                }
+              },
+              maxLines: 10),
+          const SizedBox(height: 20),
+          SizedBox(
+            height: 100,
+            width: 100,
+            child: GridView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: cubit.colorList.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 6),
+              itemBuilder: (context, index) => GestureDetector(
+                onTap: () {
+                  cubit.editColor = cubit.colorList[index];
+                  selectColor.value = cubit.colorList[index];
+                },
+                child: Container(
+                  color: Colors.white,
+                  padding: const EdgeInsets.all(8.0),
+                  child: CustomCircleAvatar(
+                    index: index,
+                    selectColor: selectColor,
+                    colorList: cubit.colorList,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          CustomButton(
+              onPressed: () async {
+                await cubit.editNote(
+                    oldNoteModel: cubit.notesList[index],
+                    editTitle: editTitleEditingController.text,
+                    editNote: editNoteEditingController.text);
+                Navigator.of(context).pop();
+              },
+              textButton: 'Save Changes'),
+        ],
+      ),
+    );
   }
 
   void deleteNote(HomeCubit cubit) {
