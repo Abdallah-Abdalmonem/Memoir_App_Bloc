@@ -101,18 +101,31 @@ class AuthContiner extends StatelessWidget {
 
                     const SizedBox(height: 20),
 
-                    CustomTextFormField(
-                      textController: passwordTextEditingController,
-                      autoValidate: AutovalidateMode.onUserInteraction,
-                      validator: (p0) {
-                        if (p0!.isEmpty) {
-                          return 'Password can\'t be empty';
-                        } else if (p0.length < 6) {
-                          return 'Password not vailed should be longer than 6';
-                        }
+                    BlocBuilder<AuthCubit, AuthState>(
+                      builder: (context, state) {
+                        final cubit = BlocProvider.of<AuthCubit>(context);
+                        return CustomTextFormField(
+                          ispassword: cubit.obsucre,
+                          maxLines: 1,
+                          suffixIcon: InkWell(
+                            onTap: () {
+                              cubit.chageObsucre();
+                            },
+                            child: cubit.eyeIcon,
+                          ),
+                          textController: passwordTextEditingController,
+                          autoValidate: AutovalidateMode.onUserInteraction,
+                          validator: (p0) {
+                            if (p0!.isEmpty) {
+                              return 'Password can\'t be empty';
+                            } else if (p0.length < 6) {
+                              return 'Password not vailed should be longer than 6';
+                            }
+                          },
+                          hintText: 'Password',
+                          labelText: 'Password',
+                        );
                       },
-                      hintText: 'Password',
-                      labelText: 'Password',
                     ),
                     const SizedBox(height: 20),
                     CustomButton(

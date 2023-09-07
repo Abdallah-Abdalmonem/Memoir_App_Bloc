@@ -17,6 +17,26 @@ class AuthCubit extends Cubit<AuthState> {
 
   UserModel? userModel;
 
+  bool obsucre = false;
+  Icon eyeIcon = const Icon(
+    Icons.remove_red_eye_rounded,
+    color: Colors.black,
+  );
+
+  chageObsucre() {
+    obsucre = !obsucre;
+    eyeIcon = obsucre == true
+        ? const Icon(
+            Icons.remove_red_eye,
+            color: Colors.black,
+          )
+        : const Icon(
+            Icons.remove_red_eye_outlined,
+            color: Colors.black,
+          );
+    emit(ObsucreChanged());
+  }
+
   Future<void> signIn({required String email, required String password}) async {
     UserCredential? credential;
     try {
@@ -27,15 +47,6 @@ class AuthCubit extends Cubit<AuthState> {
       );
 
       if (credential.user!.emailVerified) {
-        // if (credential.user?.photoURL == null) {
-        //   // UserModel userModel = UserModel(
-        //   //     userId: FirebaseAuth.instance.currentUser?.uid,
-        //   //     displayName: CacheHelper.prefs?.getString('display_name'),
-        //   //     email: credential.user?.email,
-        //   //     image: AppImage.icon);
-        //   // await UserService.uploadUserInformation(userModel: userModel);
-        //   // await CacheHelper.prefs?.remove('display_name');
-        // }
         emit(LoginSuccessfully());
       } else {
         ToastHelper.toastfailure(msg: 'EmailNotVerified');

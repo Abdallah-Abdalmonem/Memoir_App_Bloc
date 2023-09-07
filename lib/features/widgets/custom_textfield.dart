@@ -9,7 +9,7 @@ class CustomTextFormField extends StatelessWidget {
   String? Function(String?)? validator;
   AutovalidateMode? autoValidate;
   void Function(String)? onChange;
-  IconButton? suffix;
+  Widget? suffixIcon;
   TextInputType? fieldType;
   TextEditingController? textController;
   bool? ispassword = false;
@@ -17,7 +17,7 @@ class CustomTextFormField extends StatelessWidget {
   bool? readOnly = false;
   double sizeHeight;
   String? initialValue;
-  int? maxLines;
+  int? maxLines = 3;
   void Function(String?)? onSaved;
 
   CustomTextFormField({
@@ -28,7 +28,7 @@ class CustomTextFormField extends StatelessWidget {
     this.onSaved,
     this.onChange,
     this.maxLines,
-    this.suffix,
+    this.suffixIcon,
     this.validator,
     this.autoValidate,
     this.ispassword,
@@ -53,13 +53,13 @@ class CustomTextFormField extends StatelessWidget {
       obscureText: ispassword ?? false,
       controller: textController,
       readOnly: readOnly ?? false,
-      maxLines: maxLines ?? 4,
+      maxLines: maxLines,
       minLines: 1,
       decoration: InputDecoration(
         contentPadding:
             EdgeInsets.symmetric(horizontal: 14, vertical: sizeHeight),
         // suffix: suffix,
-        suffixIcon: suffix,
+        suffixIcon: suffixIcon,
         fillColor: Colors.white,
         filled: true,
         // contentPadding: const EdgeInsets.all(10),
