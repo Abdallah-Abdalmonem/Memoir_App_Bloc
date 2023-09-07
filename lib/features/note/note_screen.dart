@@ -7,7 +7,8 @@ import '../../models/note_model.dart';
 class NoteScreen extends StatelessWidget {
   NoteScreen({super.key});
 
-  late final ValueNotifier<double> fontSizeValue = ValueNotifier<double>(16);
+  late final ValueNotifier<double> fontSizeTitle = ValueNotifier<double>(16);
+  late final ValueNotifier<double> fontSizeNote = ValueNotifier<double>(16);
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +28,6 @@ class NoteScreen extends StatelessWidget {
       backgroundColor: Color(int.parse('${noteData.color}')).withOpacity(.9),
       appBar: AppBar(
         leadingWidth: 30,
-        toolbarHeight: MediaQuery.of(context).size.height * .06,
-        backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
           IconButton(
@@ -36,7 +35,7 @@ class NoteScreen extends StatelessWidget {
                 await showModalBottomSheet(
                     context: context,
                     builder: (context) => Container(
-                          height: 200,
+                          height: 400,
                           color: Colors.white,
                           child: Column(
                             children: [
@@ -44,31 +43,75 @@ class NoteScreen extends StatelessWidget {
                               const Spacer(),
                               Column(
                                 children: [
-                                  CircleAvatar(
-                                    backgroundColor:
-                                        Color(int.parse('${noteData.color}'))
-                                            .withOpacity(1),
-                                    radius: 30,
-                                    child: ValueListenableBuilder<double>(
-                                      valueListenable: fontSizeValue,
-                                      builder: (context, value, child) => Text(
-                                        '${fontSizeValue.value.toInt()}',
-                                        textScaleFactor: 2,
-                                        style: const TextStyle(
-                                            color: Colors.white),
-                                        maxLines: 1,
+                                  Column(
+                                    children: [
+                                      Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          CircleAvatar(
+                                            backgroundColor: Colors.black,
+                                            radius: 30,
+                                            child:
+                                                ValueListenableBuilder<double>(
+                                              valueListenable: fontSizeTitle,
+                                              builder:
+                                                  (context, value, child) =>
+                                                      Text(
+                                                '${fontSizeTitle.value.toInt()}',
+                                                textScaleFactor: 2,
+                                                style: const TextStyle(
+                                                    color: Colors.white),
+                                                maxLines: 1,
+                                              ),
+                                            ),
+                                          ),
+                                          const Text('Title Size'),
+                                        ],
                                       ),
-                                    ),
+                                    ],
                                   ),
                                   ValueListenableBuilder<double>(
-                                    valueListenable: fontSizeValue,
+                                    valueListenable: fontSizeTitle,
                                     builder: (context, value, child) => Slider(
                                         max: 100,
                                         min: 10,
-                                        value: fontSizeValue.value,
+                                        value: fontSizeTitle.value,
                                         onChanged: (value) {
-                                          fontSizeValue.value = value;
+                                          fontSizeTitle.value = value;
                                         }),
+                                  ),
+                                  const Divider(),
+                                  Column(
+                                    children: [
+                                      const Text('Note Size'),
+                                      CircleAvatar(
+                                        backgroundColor: Colors.black,
+                                        radius: 30,
+                                        child: ValueListenableBuilder<double>(
+                                          valueListenable: fontSizeNote,
+                                          builder: (context, value, child) =>
+                                              Text(
+                                            '${fontSizeNote.value.toInt()}',
+                                            textScaleFactor: 2,
+                                            style: const TextStyle(
+                                                color: Colors.white),
+                                            maxLines: 1,
+                                          ),
+                                        ),
+                                      ),
+                                      ValueListenableBuilder<double>(
+                                        valueListenable: fontSizeNote,
+                                        builder: (context, value, child) =>
+                                            Slider(
+                                                max: 100,
+                                                min: 10,
+                                                value: fontSizeNote.value,
+                                                onChanged: (value) {
+                                                  fontSizeNote.value = value;
+                                                }),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -87,22 +130,24 @@ class NoteScreen extends StatelessWidget {
                 color: Colors.white,
               )),
         ],
-        title: Text(
-          '${noteData.title}',
-          style: const TextStyle(
+        title: const Text(
+          // '${noteData.title}',
+          'My Note',
+          style: TextStyle(
             letterSpacing: 1,
             overflow: TextOverflow.ellipsis,
             color: Colors.white,
           ),
         ),
       ),
-      body: Container(
-        padding: const EdgeInsets.all(10),
-        height: double.infinity,
-        decoration: const BoxDecoration(
-            image: DecorationImage(
-                image: AssetImage(AppImage.backgroundAuth), fit: BoxFit.cover)),
-        child: SafeArea(
+      body: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          height: double.infinity,
+          decoration: const BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage(AppImage.backgroundAuth),
+                  fit: BoxFit.cover)),
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Center(
@@ -115,7 +160,24 @@ class NoteScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     ValueListenableBuilder<double>(
-                      valueListenable: fontSizeValue,
+                      valueListenable: fontSizeTitle,
+                      builder: (context, value, child) => SelectableText(
+                        maxLines: null,
+                        textDirection:
+                            isArabic() ? TextDirection.rtl : TextDirection.ltr,
+                        '${noteData.title}',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: fontSizeTitle.value,
+                            letterSpacing: 4,
+                            wordSpacing: 3,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red),
+                      ),
+                    ),
+                    const Divider(),
+                    ValueListenableBuilder<double>(
+                      valueListenable: fontSizeNote,
                       builder: (context, value, child) => SelectableText(
                         maxLines: null,
                         textDirection:
@@ -123,8 +185,8 @@ class NoteScreen extends StatelessWidget {
                         '${noteData.note}',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                            fontSize: fontSizeValue.value,
-                            letterSpacing: 4,
+                            fontSize: fontSizeNote.value,
+                            letterSpacing: 2,
                             wordSpacing: 3,
                             color: Colors.black),
                       ),
