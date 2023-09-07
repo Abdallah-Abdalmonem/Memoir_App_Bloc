@@ -26,10 +26,10 @@ class SigninScreen extends StatelessWidget {
         listener: (context, state) {
           if (state is LoginSuccessfully) {
             Navigator.of(context).pushReplacementNamed(AppRoutes.home);
-            CacheHelper.setSignin()
-                .then((value) => BlocProvider.of<HomeCubit>(context)
-                  ..getNotes()
+            CacheHelper.setSignin().then((value) =>
+                BlocProvider.of<HomeCubit>(context)
                   ..signinWithEmailAndPassword = true);
+            clearTextFormField();
             ToastHelper.toastSuccess(msg: 'signin success!!');
           }
           if (state is LoginLoading) {
@@ -46,6 +46,7 @@ class SigninScreen extends StatelessWidget {
             Navigator.of(context).pushReplacementNamed(AppRoutes.home);
             CacheHelper.setSignin().then(
                 (value) => BlocProvider.of<HomeCubit>(context).getNotes());
+            clearTextFormField();
             ToastHelper.toastSuccess(msg: 'signin success!!');
           }
           if (state is SignINWithGoogleFailed) {
@@ -85,8 +86,7 @@ class SigninScreen extends StatelessWidget {
                       passwordTextEditingController: passwordController,
                       navigateText: 'Sign up',
                       tapNavigation: () {
-                        // controller.clearTextFormField();
-
+                        clearTextFormField();
                         Navigator.of(context)
                             .pushReplacementNamed(AppRoutes.signup);
                       },
@@ -95,7 +95,6 @@ class SigninScreen extends StatelessWidget {
                           await cubit.signIn(
                               email: emailController.text,
                               password: passwordController.text);
-                          // controller.clearTextFormField();
                         }
                       },
                       title: 'Sign in',
@@ -108,5 +107,10 @@ class SigninScreen extends StatelessWidget {
             ),
           ),
         ));
+  }
+
+  clearTextFormField() {
+    emailController.clear();
+    passwordController.clear();
   }
 }

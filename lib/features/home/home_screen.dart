@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:memoir_app_bloc/features/home/home_cubit/home_cubit.dart';
+import 'package:memoir_app_bloc/helper/custom_snackbar.dart';
 
 import '../../services/user_service.dart';
 import '../../constant/app_image.dart';
@@ -25,7 +26,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cubit = BlocProvider.of<HomeCubit>(context);
+    final cubit = BlocProvider.of<HomeCubit>(context)..loadUser();
     return Scaffold(
         drawer: drawerBuilder(cubit, context),
         backgroundColor: Colors.white,
@@ -62,18 +63,34 @@ class HomeScreen extends StatelessWidget {
                                 hintText: 'Note',
                                 textController: noteEditingController),
                             CustomSelectColorBuilder(),
-                            ElevatedButton(
-                              onPressed: () async {
-                                if (homeKey.currentState!.validate()) {
-                                  await cubit.addNote(
-                                      title: titleEditingController.text.isEmpty
-                                          ? 'No Title'
-                                          : titleEditingController.text,
-                                      note: noteEditingController.text);
-                                  FocusManager.instance.primaryFocus?.unfocus();
+                            BlocConsumer<HomeCubit, HomeState>(
+                              listener: (context, state) {
+                                if (state is AddNoteSuccessfully) {
+                                  titleEditingController.clear();
+                                  noteEditingController.clear();
                                 }
                               },
-                              child: const Text('Add Note'),
+                              builder: (context, state) {
+                                if (state is AddNoteLoading) {
+                                  return const CircularProgressIndicator
+                                      .adaptive();
+                                }
+                                return ElevatedButton(
+                                  onPressed: () async {
+                                    if (homeKey.currentState!.validate()) {
+                                      await cubit.addNote(
+                                          title: titleEditingController
+                                                  .text.isEmpty
+                                              ? 'No Title'
+                                              : titleEditingController.text,
+                                          note: noteEditingController.text);
+                                      FocusManager.instance.primaryFocus
+                                          ?.unfocus();
+                                    }
+                                  },
+                                  child: const Text('Add Note'),
+                                );
+                              },
                             ),
                             const SizedBox(height: 6),
                             if (state is GetNoteSuccessfully)
@@ -102,7 +119,7 @@ class HomeScreen extends StatelessWidget {
                               ),
                             if (state is GetNoteFailed)
                               const Center(
-                                child: const Text('Error!!',
+                                child: Text('Error!!',
                                     style: TextStyle(
                                         fontSize: 24, color: Colors.red)),
                               ),
@@ -148,15 +165,20 @@ AppBar appBarBuilder(HomeCubit cubit, BuildContext context) {
               case 'deleteAll':
                 await cubit.deleteAllNote();
                 break;
-              case 'refresh':
+              case 'refresh_all_data':
+                await cubit.refreshScreen();
+                break;
+              case 'refresh_notes':
                 await cubit.refreshScreen();
                 break;
               default:
             }
           },
           itemBuilder: (context) => const [
-            PopupMenuItem(value: 'deleteAll', child: Text("delete all")),
-            PopupMenuItem(value: 'refresh', child: Text("refresh screen"))
+            PopupMenuItem(value: 'deleteAll', child: Text("Delete All")),
+            PopupMenuItem(
+                value: 'refresh_all_data', child: Text("Refresh All Data")),
+            PopupMenuItem(value: 'refresh_notes', child: Text("Refresh Notes"))
           ],
         )
       ]);
@@ -174,119 +196,167 @@ Drawer drawerBuilder(HomeCubit cubit, BuildContext context) {
                   image: AssetImage(AppImage.backgroundAuth))),
           child: GestureDetector(
             onLongPress: () async {
-              // if (cubit.imageUrl != null && cubit.signinWithEmailAndPassword) {
-              //   showDialog(
-              //       context: context,
-              //       builder: (context) => AlertDialog(
-              //             title: const Text('Delete photo'),
-              //             content: const Text('Do you want to delete photo?'),
-              //             actions: [
-              //               CustomButton(
-              //                   textButton: 'Delete',
-              //                   colorButton: Colors.red,
-              //                   onPressed: () async {
-              //                     await cubit.removeProfileImage().then(
-              //                         (value) => Navigator.of(context).pop());
-              //                   }),
-              //               CustomButton(
-              //                   textButton: 'Cancel',
-              //                   colorText: Colors.black,
-              //                   colorButton: Colors.white,
-              //                   onPressed: () => Navigator.of(context).pop())
-              //             ],
-              //           )
-              //       // buttonColor: AppColor.primaryColor,
-              //       // cancelTextColor: Colors.red,
-              //       // confirmTextColor: Colors.white,
-              //       );
-              // } else if (cubit.signinWithEmailAndPassword == false) {
-              //   ToastHelper.toastfailure(
-              //       msg: 'You should signin without gmail');
-              // } else {
-              //   ToastHelper.toastfailure(
-              //       msg: 'You should choose photo to delete it');
-              // }
+              if (cubit.userModel?.image != null &&
+                  cubit.signinWithEmailAndPassword) {
+                showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                          title: const Text('Delete photo'),
+                          content: const Text('Do you want to delete photo?'),
+                          actions: [
+                            CustomButton(
+                                textButton: 'Delete',
+                                colorButton: Colors.red,
+                                onPressed: () async {
+                                  await cubit.removeProfileImage().then(
+                                      (value) => Navigator.of(context).pop());
+                                }),
+                            CustomButton(
+                                textButton: 'Cancel',
+                                colorText: Colors.black,
+                                colorButton: Colors.white,
+                                onPressed: () => Navigator.of(context).pop())
+                          ],
+                        )
+                    // buttonColor: AppColor.primaryColor,
+                    // cancelTextColor: Colors.red,
+                    // confirmTextColor: Colors.white,
+                    );
+              } else if (cubit.signinWithEmailAndPassword) {
+                ToastHelper.toastfailure(
+                    msg: 'You should choose photo to delete it');
+              } else {
+                ToastHelper.toastfailure(
+                    msg: 'You should signin without gmail');
+              }
             },
             onTap: () async {
-              // if (FirebaseAuth.instance.currentUser?.photoURL != null) {
-              //   // signin with gmail
-              //   Navigator.of(context).pushNamed(AppRoutes.imageScreen,
-              //       arguments: FirebaseAuth.instance.currentUser!.photoURL);
-              // }
-              // if (cubit.imageUrl == null) {
-              // } else if (cubit.imageUrl != null &&
-              //     cubit.signinWithEmailAndPassword) {
-              //   // there is image
-              //   Navigator.of(context).pushNamed(AppRoutes.imageScreen,
-              //       arguments: cubit.imageUrl);
-              // } else {
-              //   // default image
-              //   Navigator.of(context)
-              //       .pushNamed(AppRoutes.imageScreen, arguments: null);
-              // }
+              if (cubit.currentUser?.photoURL != null) {
+                // signin with gmail
+                Navigator.of(context).pushNamed(AppRoutes.imageScreen,
+                    arguments: cubit.currentUser!.photoURL);
+              }
+              if (cubit.userModel?.image != null &&
+                  cubit.signinWithEmailAndPassword) {
+                // there is image
+                Navigator.of(context).pushNamed(AppRoutes.imageScreen,
+                    arguments: cubit.userModel?.image);
+              } else {
+                // default image
+                Navigator.of(context)
+                    .pushNamed(AppRoutes.imageScreen, arguments: null);
+              }
             },
-            /*
             child: CircleAvatar(
               radius: double.infinity,
               child: BlocBuilder<HomeCubit, HomeState>(
                 builder: (context, state) {
-                  return FutureBuilder(
-                      future: cubit.getImageProfile(),
-                      builder: (context, snapshot) {
-                        return CircleAvatar(
-                            radius: double.infinity,
-                            backgroundImage:
-                                // image not found
-                                snapshot.data == null &&
-                                        cubit.signinWithEmailAndPassword
-                                    ? const AssetImage(AppImage.icon)
-                                    // there is image
-                                    : snapshot.data != null &&
-                                            cubit.signinWithEmailAndPassword
-                                        ? NetworkImage(snapshot.data!)
-                                            as ImageProvider<Object>?
-                                        // if sign with gmail
-                                        : Image.network(FirebaseAuth.instance
-                                                .currentUser!.photoURL!)
-                                            .image,
-                            // view camera for signin with email&password
-                            child: cubit.signinWithEmailAndPassword
-                                ? viewCamera(cubit, context)
-                                : null);
-                      });
+                  if (state is GetProfileImageLoading ||
+                      state is RemoveProfileImageLoading ||
+                      state is UploadProfileImageLoading) {
+                    return const CircularProgressIndicator.adaptive();
+                  }
+                  return CircleAvatar(
+                      radius: double.infinity,
+                      backgroundImage:
+                          // login with email and password and image not found
+                          cubit.signinWithEmailAndPassword &&
+                                  // cubit.userModel?.image == '' ||
+                                  cubit.userModel?.image == null
+                              ? const AssetImage(AppImage.icon)
+                              // there is image
+                              : cubit.signinWithEmailAndPassword &&
+                                      cubit.userModel?.image != null
+                                  ? NetworkImage(cubit.userModel!.image!)
+                                      as ImageProvider<Object>?
+                                  // if sign with gmail
+                                  : Image.network(FirebaseAuth
+                                          .instance.currentUser!.photoURL!)
+                                      .image,
+                      // view camera for signin with email&password
+                      child: cubit.signinWithEmailAndPassword
+                          ? viewCamera(cubit, context)
+                          : null);
                 },
               ),
             ),
-          */
           ),
         ),
-        SizedBox(
-          width: double.infinity,
-          child: Card(
-            shadowColor: Colors.purpleAccent,
-            elevation: 8,
-            margin: const EdgeInsets.all(8),
-            child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                    textScaleFactor: 1.2,
-                    'Name: ${cubit.currentUser?.displayName}',
-                    style: const TextStyle(fontSize: 20))),
+        BlocListener<HomeCubit, HomeState>(
+          listener: (context, state) {
+            // if (state is UploadProfileImageLoading ||
+            //     state is RemoveProfileImageLoading ||
+            //     state is GetProfileImageLoading) {
+            //   CustomSnackBar(context, 'Please wait..');
+            // }
+            if (state is UploadProfileImageSuccessfully) {
+              Navigator.of(context).pop();
+            }
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: Card(
+                  shadowColor: Colors.purpleAccent,
+                  elevation: 8,
+                  margin: const EdgeInsets.all(8),
+                  child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: BlocBuilder<HomeCubit, HomeState>(
+                        builder: (context, state) {
+                          if (state is GetUserInformationLoading) {
+                            const Text('Loading ...');
+                          }
+                          return Wrap(
+                            children: [
+                              const Text(
+                                  textScaleFactor: 1.2,
+                                  'Name: ',
+                                  style: TextStyle(fontSize: 20)),
+                              Text(
+                                  textScaleFactor: 1.2,
+                                  '${cubit.userModel?.displayName ?? cubit.currentUser?.displayName}',
+                                  style: const TextStyle(fontSize: 20)),
+                            ],
+                          );
+                        },
+                      )),
+                ),
+              ),
+              SizedBox(
+                  width: double.infinity,
+                  child: Card(
+                      shadowColor: Colors.purpleAccent,
+                      margin: const EdgeInsets.all(8),
+                      elevation: 8,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: BlocBuilder<HomeCubit, HomeState>(
+                          builder: (context, state) {
+                            if (state is GetUserInformationLoading) {
+                              const Text('Loading ...');
+                            }
+                            return Wrap(
+                              children: [
+                                const Text(
+                                    textScaleFactor: 1.2,
+                                    'Email: ',
+                                    style: TextStyle(fontSize: 20)),
+                                Text(
+                                    textScaleFactor: 1.2,
+                                    '${cubit.userModel?.email ?? cubit.currentUser?.email}',
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 20))
+                              ],
+                            );
+                          },
+                        ),
+                      ))),
+            ],
           ),
         ),
-        SizedBox(
-            width: double.infinity,
-            child: Card(
-                shadowColor: Colors.purpleAccent,
-                margin: const EdgeInsets.all(8),
-                elevation: 8,
-                child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                        textScaleFactor: 1.2,
-                        'Email:\n${cubit.currentUser?.email}',
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 20))))),
         const SizedBox(height: 50),
         const Padding(
           padding: EdgeInsets.all(20.0),
@@ -321,7 +391,8 @@ Drawer drawerBuilder(HomeCubit cubit, BuildContext context) {
   );
 }
 
-Column viewCamera(HomeCubit cubit, BuildContext context) {
+viewCamera(HomeCubit cubit, BuildContext context) {
+  bool isDismiss = true;
   return Column(
     mainAxisSize: MainAxisSize.max,
     crossAxisAlignment: CrossAxisAlignment.center,
@@ -336,6 +407,7 @@ Column viewCamera(HomeCubit cubit, BuildContext context) {
             child: InkWell(
               onTap: () async {
                 showModalBottomSheet(
+                  isDismissible: isDismiss,
                   context: context,
                   builder: (context) => Container(
                     height: 200,
@@ -348,9 +420,10 @@ Column viewCamera(HomeCubit cubit, BuildContext context) {
                           child: IconButton(
                             iconSize: 50,
                             onPressed: () async {
-                              await cubit.uploadImage(
+                              await cubit.updateProfileImage(
                                 fromWhat: 'gallery',
                               );
+                              isDismiss = false;
                             },
                             icon: const Icon(
                               Icons.photo,
@@ -364,8 +437,8 @@ Column viewCamera(HomeCubit cubit, BuildContext context) {
                           child: IconButton(
                             iconSize: 50,
                             onPressed: () async {
-                              await cubit.uploadImage(fromWhat: 'camera');
-                              Navigator.of(context).pop();
+                              await cubit.updateProfileImage(
+                                  fromWhat: 'camera');
                             },
                             icon: const Icon(
                               Icons.photo_camera,
@@ -389,10 +462,10 @@ Column viewCamera(HomeCubit cubit, BuildContext context) {
   );
 }
 
-MasonryGridView viewGridView(List<NoteModel>? snapshot, HomeCubit cubit) {
+MasonryGridView viewGridView(List<NoteModel>? noteList, HomeCubit cubit) {
   return MasonryGridView.builder(
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: snapshot?.length,
+      itemCount: noteList?.length,
       shrinkWrap: true,
       scrollDirection: Axis.vertical,
       crossAxisSpacing: 16,
@@ -400,18 +473,17 @@ MasonryGridView viewGridView(List<NoteModel>? snapshot, HomeCubit cubit) {
       gridDelegate: const SliverSimpleGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2),
       itemBuilder: (context, index) => CustomListTile(
-          listTileColor: Color(int.parse('${snapshot?[index].color}')),
+          listTileColor: Color(int.parse('${noteList?[index].color}')),
           cubit: cubit,
           index: index));
 }
 
 class CustomListTile extends StatelessWidget {
-  const CustomListTile({
-    super.key,
-    required this.listTileColor,
-    required this.cubit,
-    required this.index,
-  });
+  const CustomListTile(
+      {super.key,
+      required this.listTileColor,
+      required this.cubit,
+      required this.index});
 
   final Color listTileColor;
   final HomeCubit cubit;
@@ -601,15 +673,28 @@ class CustomListTile extends StatelessWidget {
               ),
             ),
           ),
-          CustomButton(
-              onPressed: () async {
-                await cubit.editNote(
-                    oldNoteModel: cubit.notesList[index],
-                    editTitle: editTitleEditingController.text,
-                    editNote: editNoteEditingController.text);
+          BlocConsumer<HomeCubit, HomeState>(
+            listener: (context, state) {
+              if (state is EditNoteSuccessfully) {
+                editTitleEditingController.clear();
+                editNoteEditingController.clear();
                 Navigator.of(context).pop();
-              },
-              textButton: 'Save Changes'),
+              }
+            },
+            builder: (context, state) {
+              if (state is EditNoteLoading) {
+                return const CircularProgressIndicator.adaptive();
+              }
+              return CustomButton(
+                  onPressed: () async {
+                    await cubit.editNote(
+                        oldNoteModel: cubit.notesList[index],
+                        editTitle: editTitleEditingController.text,
+                        editNote: editNoteEditingController.text);
+                  },
+                  textButton: 'Save Changes');
+            },
+          ),
         ],
       ),
     );

@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
           primarySwatch: AppColor.primaryColor,
         ),
         initialRoute:
-            CacheHelper.isSignin() == false ? AppRoutes.signin : AppRoutes.home,
+            CacheHelper.isSignin() == true ? AppRoutes.home : AppRoutes.signin,
         routes: routes,
       ),
     );

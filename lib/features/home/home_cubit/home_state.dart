@@ -8,9 +8,7 @@ class HomeInitial extends HomeState {}
 // add notes
 class AddNoteLoading extends HomeState {}
 
-class AddNoteSuccessfully extends HomeState {
-  AddNoteSuccessfully();
-}
+class AddNoteSuccessfully extends HomeState {}
 
 class AddNoteFailed extends HomeState {
   final String errorMsg;
@@ -20,9 +18,7 @@ class AddNoteFailed extends HomeState {
 // delete note
 class DeleteNoteLoading extends HomeState {}
 
-class DeleteNoteSuccessfully extends HomeState {
-  DeleteNoteSuccessfully();
-}
+class DeleteNoteSuccessfully extends HomeState {}
 
 class DeleteNoteFailed extends HomeState {
   final String errorMsg;
@@ -48,9 +44,7 @@ class GetNoteFailed extends HomeState {
 
 class EditNoteLoading extends HomeState {}
 
-class EditNoteSuccessfully extends HomeState {
-  EditNoteSuccessfully();
-}
+class EditNoteSuccessfully extends HomeState {}
 
 class EditNoteFailed extends HomeState {
   final String errorMsg;
@@ -60,9 +54,7 @@ class EditNoteFailed extends HomeState {
 // remove profile image
 class RemoveProfileImageLoading extends HomeState {}
 
-class RemoveProfileImageSuccessfully extends HomeState {
-  RemoveProfileImageSuccessfully();
-}
+class RemoveProfileImageSuccessfully extends HomeState {}
 
 class RemoveProfileImageFailed extends HomeState {
   final String errorMsg;
@@ -72,9 +64,7 @@ class RemoveProfileImageFailed extends HomeState {
 // get profile image
 class GetProfileImageLoading extends HomeState {}
 
-class GetProfileImageSuccessfully extends HomeState {
-  GetProfileImageSuccessfully();
-}
+class GetProfileImageSuccessfully extends HomeState {}
 
 class GetProfileImageFailed extends HomeState {
   final String errorMsg;
@@ -84,11 +74,20 @@ class GetProfileImageFailed extends HomeState {
 // upload profile image
 class UploadProfileImageLoading extends HomeState {}
 
-class UploadProfileImageSuccessfully extends HomeState {
-  UploadProfileImageSuccessfully();
-}
+class UploadProfileImageSuccessfully extends HomeState {}
 
 class UploadProfileImageFailed extends HomeState {
   final String errorMsg;
   UploadProfileImageFailed(this.errorMsg);
+}
+
+// get information user
+
+class GetUserInformationLoading extends HomeState {}
+
+class GetUserInformationSuccessfully extends HomeState {}
+
+class GetUserInformationFailed extends HomeState {
+  final String errorMsg;
+  GetUserInformationFailed(this.errorMsg);
 }

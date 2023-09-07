@@ -13,9 +13,7 @@ class TypeChanged extends AuthState {}
 
 class LoginLoading extends AuthState {}
 
-class LoginSuccessfully extends AuthState {
-  LoginSuccessfully();
-}
+class LoginSuccessfully extends AuthState {}
 
 class LoginConfirmation extends AuthState {}
 
@@ -39,9 +37,7 @@ class SignINWithGoogleFailed extends AuthState {
 
 class SignUpLoading extends AuthState {}
 
-class SignUpSuccessfully extends AuthState {
-  SignUpSuccessfully();
-}
+class SignUpSuccessfully extends AuthState {}
 
 class SignUpFailed extends AuthState {
   final String errorMsg;

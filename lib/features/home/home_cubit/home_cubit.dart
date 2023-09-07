@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:memoir_app_bloc/helper/cache_helper.dart';
+import 'package:memoir_app_bloc/models/user_model.dart';
 
 import '../../../helper/toast_helper.dart';
 import '../../../models/note_model.dart';
@@ -38,10 +39,32 @@ class HomeCubit extends Cubit<HomeState> {
   Color editColor = Colors.black;
 
   List<NoteModel> notesList = [];
-  bool isLoading = false;
+
   User? currentUser = FirebaseAuth.instance.currentUser;
-  String? imageUrl;
+
   bool signinWithEmailAndPassword = false;
+
+  UserModel? userModel;
+
+  loadUser() async {
+    await getImageProfile();
+    await getUserInformation();
+    await getNotes();
+  }
+
+  Future<UserModel?> getUserInformation() async {
+    try {
+      emit(GetUserInformationLoading());
+      userModel = await UserService.getUserInformation();
+      if (userModel?.displayName != null) {
+        signinWithEmailAndPassword = true;
+      }
+      emit(GetUserInformationSuccessfully());
+    } catch (e) {
+      emit(GetUserInformationSuccessfully());
+    }
+    return userModel;
+  }
 
   Future<String?> getImageProfile() async {
     try {
@@ -49,9 +72,9 @@ class HomeCubit extends Cubit<HomeState> {
       Reference refStorage = FirebaseStorage.instance
           .ref('image/${currentUser?.uid}/profile_image');
 
-      imageUrl = await refStorage.getDownloadURL();
-      if (imageUrl != null) {
-        return imageUrl;
+      userModel?.image = await refStorage.getDownloadURL();
+      if (userModel?.image != null) {
+        return userModel?.image;
       }
       emit(GetProfileImageSuccessfully());
     } catch (e) {
@@ -156,12 +179,13 @@ class HomeCubit extends Cubit<HomeState> {
 
   Future removeProfileImage() async {
     try {
-      if (imageUrl != null) {
+      if (userModel?.image != null) {
         emit(RemoveProfileImageLoading());
         await FirebaseStorage.instance
             .ref('image/${currentUser?.uid}/profile_image')
             .delete();
-        imageUrl = null;
+        userModel?.image = null;
+        await UserService.updateUserInformation(userModel: userModel!);
         emit(RemoveProfileImageSuccessfully());
       }
     } catch (e) {
@@ -169,7 +193,7 @@ class HomeCubit extends Cubit<HomeState> {
     }
   }
 
-  uploadImage({required String fromWhat}) async {
+  updateProfileImage({required String fromWhat}) async {
     XFile? image;
 
     switch (fromWhat) {
@@ -180,7 +204,7 @@ class HomeCubit extends Cubit<HomeState> {
         image = await ImageServices.pickImageFromGallery();
         break;
       default:
-        print('user not select');
+        print('there is problem in parameters');
     }
     try {
       if (image != null) {
@@ -191,7 +215,8 @@ class HomeCubit extends Cubit<HomeState> {
 
         File imageFile = File(image.path);
         await refStorage.putFile(imageFile);
-        await getImageProfile();
+        userModel?.image = await getImageProfile();
+        UserService.updateUserInformation(userModel: userModel!);
         emit(UploadProfileImageSuccessfully());
       } else {
         ToastHelper.toastfailure(msg: 'Please Choose Image');

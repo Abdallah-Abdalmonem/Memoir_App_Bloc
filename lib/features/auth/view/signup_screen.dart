@@ -26,6 +26,7 @@ class SignupScreen extends StatelessWidget {
           if (state is SignUpSuccessfully) {
             Navigator.of(context).pushReplacementNamed(AppRoutes.signin);
             ToastHelper.toastSuccess(msg: 'Please confirm your email');
+            clearTextFormField();
           } else if (state is SignUpLoading) {
             CustomSnackBar(context, 'Please Wait...');
           } else if (state is SignUpFailed) {
@@ -68,8 +69,7 @@ class SignupScreen extends StatelessWidget {
                       title: 'Sign up',
                       navigateText: 'login',
                       tapNavigation: () {
-                        // controller.clearTextFormField();
-
+                        clearTextFormField();
                         Navigator.of(context)
                             .pushReplacementNamed(AppRoutes.signin);
                       },
@@ -79,8 +79,6 @@ class SignupScreen extends StatelessWidget {
                               email: emailController.text,
                               password: passwordController.text,
                               name: nameController.text);
-                          // controller.clearTextFormField();
-                          // controller.nameController.clear();
                         }
                       },
                     ),
@@ -90,5 +88,11 @@ class SignupScreen extends StatelessWidget {
             ),
           ),
         ));
+  }
+
+  clearTextFormField() {
+    nameController.clear();
+    emailController.clear();
+    passwordController.clear();
   }
 }

@@ -4,13 +4,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_model.dart';
 
 class UserService {
-  static List<UserModel> listUserModel = [];
-  static Future uploadUserInformation({required UserModel userModel}) async {
-    await FirebaseFirestore.instance.collection('user').add(userModel.toJson());
+  static UserModel? listUserModel;
+  static Future createUserInformation({required UserModel userModel}) async {
+    await FirebaseFirestore.instance
+        .collection('user')
+        .doc(FirebaseAuth.instance.currentUser?.uid)
+        .set(userModel.toJson());
   }
 
-  static Future<List<UserModel>> getUserInformation() async {
-    listUserModel = [];
+  static Future<UserModel?> getUserInformation() async {
     QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore
         .instance
         .collection('user')
@@ -19,10 +21,17 @@ class UserService {
     var listDocs = querySnapshot.docs;
     if (listDocs.length > 0) {
       for (int i = 0; i < listDocs.length; i++) {
-        listUserModel.add(UserModel.fromJson(
-            jsonData: listDocs[i].data(), userId: listDocs[i].id));
+        listUserModel = UserModel.fromJson(
+            jsonData: listDocs[i].data(), userId: listDocs[i].id);
       }
     }
     return listUserModel;
+  }
+
+  static Future updateUserInformation({required UserModel userModel}) async {
+    await FirebaseFirestore.instance
+        .collection('user')
+        .doc(userModel.userId)
+        .update(userModel.toJson());
   }
 }

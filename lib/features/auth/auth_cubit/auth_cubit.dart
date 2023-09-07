@@ -15,6 +15,8 @@ part 'auth_state.dart';
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit() : super(AuthInitial());
 
+  UserModel? userModel;
+
   Future<void> signIn({required String email, required String password}) async {
     UserCredential? credential;
     try {
@@ -25,11 +27,15 @@ class AuthCubit extends Cubit<AuthState> {
       );
 
       if (credential.user!.emailVerified) {
-        if (credential.user?.photoURL == null) {
-          await credential.user
-              ?.updateDisplayName(CacheHelper.prefs?.getString('display_name'));
-          await CacheHelper.prefs?.remove('display_name');
-        }
+        // if (credential.user?.photoURL == null) {
+        //   // UserModel userModel = UserModel(
+        //   //     userId: FirebaseAuth.instance.currentUser?.uid,
+        //   //     displayName: CacheHelper.prefs?.getString('display_name'),
+        //   //     email: credential.user?.email,
+        //   //     image: AppImage.icon);
+        //   // await UserService.uploadUserInformation(userModel: userModel);
+        //   // await CacheHelper.prefs?.remove('display_name');
+        // }
         emit(LoginSuccessfully());
       } else {
         ToastHelper.toastfailure(msg: 'EmailNotVerified');
@@ -54,8 +60,13 @@ class AuthCubit extends Cubit<AuthState> {
         email: email,
         password: password,
       );
+      userModel = UserModel(
+          userId: FirebaseAuth.instance.currentUser?.uid,
+          displayName: name,
+          email: userCredential.user?.email);
+      await UserService.createUserInformation(userModel: userModel!);
+
       if (!userCredential.user!.emailVerified) {
-        await CacheHelper.prefs?.setString('display_name', name);
         await userCredential.user!.sendEmailVerification();
         emit(SignUpSuccessfully());
       }
