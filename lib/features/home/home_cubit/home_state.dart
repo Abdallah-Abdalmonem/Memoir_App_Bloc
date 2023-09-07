@@ -71,14 +71,14 @@ class GetProfileImageFailed extends HomeState {
   GetProfileImageFailed(this.errorMsg);
 }
 
-// upload profile image
-class UploadProfileImageLoading extends HomeState {}
+// update profile image
+class UpdateProfileImageLoading extends HomeState {}
 
-class UploadProfileImageSuccessfully extends HomeState {}
+class UpdateProfileImageSuccessfully extends HomeState {}
 
-class UploadProfileImageFailed extends HomeState {
+class UpdateProfileImageFailed extends HomeState {
   final String errorMsg;
-  UploadProfileImageFailed(this.errorMsg);
+  UpdateProfileImageFailed(this.errorMsg);
 }
 
 // get information user

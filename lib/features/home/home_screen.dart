@@ -152,6 +152,12 @@ AppBar appBarBuilder(HomeCubit cubit, BuildContext context) {
       actions: [
         IconButton(
           onPressed: () async {
+            Navigator.of(context).pushNamed(AppRoutes.favoriteScreen);
+          },
+          icon: const Icon(Icons.favorite, color: Colors.red),
+        ),
+        IconButton(
+          onPressed: () async {
             await showSearch(
                 context: context,
                 delegate: CustomSearchDelegate(notesList: cubit.notesList));
@@ -192,8 +198,9 @@ Drawer drawerBuilder(HomeCubit cubit, BuildContext context) {
         DrawerHeader(
           decoration: const BoxDecoration(
               image: DecorationImage(
-                  fit: BoxFit.cover,
-                  image: AssetImage(AppImage.backgroundAuth))),
+            fit: BoxFit.cover,
+            image: AssetImage(AppImage.backgroundAuth),
+          )),
           child: GestureDetector(
             onLongPress: () async {
               if (cubit.userModel?.image != null &&
@@ -253,7 +260,7 @@ Drawer drawerBuilder(HomeCubit cubit, BuildContext context) {
                 builder: (context, state) {
                   if (state is GetProfileImageLoading ||
                       state is RemoveProfileImageLoading ||
-                      state is UploadProfileImageLoading) {
+                      state is UpdateProfileImageLoading) {
                     return const CircularProgressIndicator.adaptive();
                   }
                   return CircleAvatar(
@@ -284,12 +291,11 @@ Drawer drawerBuilder(HomeCubit cubit, BuildContext context) {
         ),
         BlocListener<HomeCubit, HomeState>(
           listener: (context, state) {
-            // if (state is UploadProfileImageLoading ||
-            //     state is RemoveProfileImageLoading ||
-            //     state is GetProfileImageLoading) {
-            //   CustomSnackBar(context, 'Please wait..');
-            // }
-            if (state is UploadProfileImageSuccessfully) {
+            if (state is UpdateProfileImageLoading ||
+                state is RemoveProfileImageLoading) {
+              ToastHelper.toastSuccess(msg: 'Please wait..');
+            }
+            if (state is UpdateProfileImageSuccessfully) {
               Navigator.of(context).pop();
             }
           },
@@ -380,7 +386,6 @@ Drawer drawerBuilder(HomeCubit cubit, BuildContext context) {
               await CacheHelper.prefs?.clear().then((value) async {
                 await FirebaseAuth.instance.signOut();
                 Navigator.of(context).pushReplacementNamed(AppRoutes.signin);
-                // controller.onClose();
               });
             },
           ),
@@ -561,7 +566,7 @@ class CustomListTile extends StatelessWidget {
                         ? Colors.white
                         : Colors.black,
                     overflow: TextOverflow.ellipsis),
-                maxLines: 8),
+                maxLines: 10),
             const SizedBox(height: 2),
             const Divider(color: Colors.white),
             const SizedBox(height: 2),
@@ -598,10 +603,9 @@ class CustomListTile extends StatelessWidget {
     ValueNotifier<Color> selectColor =
         ValueNotifier<Color>(cubit.selectedColor);
     showDialog(
+      barrierDismissible: false,
       context: context,
-      builder: (context) =>
-          // barrierDismissible: false,
-          SimpleDialog(
+      builder: (context) => SimpleDialog(
         contentPadding: const EdgeInsets.all(15),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -636,16 +640,17 @@ class CustomListTile extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           CustomTextFormField(
-              initialValue: cubit.notesList[index].note,
-              onChange: (value) {
-                if (value.isEmpty || value == null || value == '') {
-                  editNoteEditingController.text =
-                      '${cubit.notesList[index].note}';
-                } else {
-                  editNoteEditingController.text = value;
-                }
-              },
-              maxLines: 10),
+            maxLines: 10,
+            initialValue: cubit.notesList[index].note,
+            onChange: (value) {
+              if (value.isEmpty || value == null || value == '') {
+                editNoteEditingController.text =
+                    '${cubit.notesList[index].note}';
+              } else {
+                editNoteEditingController.text = value;
+              }
+            },
+          ),
           const SizedBox(height: 20),
           SizedBox(
             height: 100,
@@ -683,7 +688,8 @@ class CustomListTile extends StatelessWidget {
             },
             builder: (context, state) {
               if (state is EditNoteLoading) {
-                return const CircularProgressIndicator.adaptive();
+                return const Center(
+                    child: CircularProgressIndicator.adaptive());
               }
               return CustomButton(
                   onPressed: () async {

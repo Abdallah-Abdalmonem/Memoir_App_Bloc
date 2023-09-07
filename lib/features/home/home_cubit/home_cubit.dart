@@ -47,9 +47,9 @@ class HomeCubit extends Cubit<HomeState> {
   UserModel? userModel;
 
   loadUser() async {
-    await getImageProfile();
-    await getUserInformation();
-    await getNotes();
+    // await getImageProfile();
+    // await getUserInformation();
+    // await getNotes();
   }
 
   Future<UserModel?> getUserInformation() async {
@@ -171,8 +171,10 @@ class HomeCubit extends Cubit<HomeState> {
       );
       await NoteService.editNote(
           noteId: oldNoteModel.noteId.toString(), noteModel: noteModel);
+      emit(EditNoteSuccessfully());
       await getNotes();
     } catch (e) {
+      emit(EditNoteFailed(e.toString()));
       ToastHelper.toastfailure(msg: e.toString());
     }
   }
@@ -208,7 +210,7 @@ class HomeCubit extends Cubit<HomeState> {
     }
     try {
       if (image != null) {
-        emit(UploadProfileImageLoading());
+        emit(UpdateProfileImageLoading());
         // String imageName = basename(image.path);
         Reference refStorage = FirebaseStorage.instance
             .ref('image/${currentUser?.uid}/profile_image');
@@ -217,12 +219,12 @@ class HomeCubit extends Cubit<HomeState> {
         await refStorage.putFile(imageFile);
         userModel?.image = await getImageProfile();
         UserService.updateUserInformation(userModel: userModel!);
-        emit(UploadProfileImageSuccessfully());
+        emit(UpdateProfileImageSuccessfully());
       } else {
         ToastHelper.toastfailure(msg: 'Please Choose Image');
       }
     } catch (e) {
-      emit(UploadProfileImageFailed(e.toString()));
+      emit(UpdateProfileImageFailed(e.toString()));
     }
   }
 
