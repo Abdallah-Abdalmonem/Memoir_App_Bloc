@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:memoir_app_bloc/constant/app_color.dart';
 import 'package:memoir_app_bloc/features/home/home_cubit/home_cubit.dart';
 import 'package:memoir_app_bloc/helper/custom_snackbar.dart';
 
@@ -59,7 +60,8 @@ class HomeScreen extends StatelessWidget {
                                   }
                                   return null;
                                 },
-                                sizeHeight: 30,
+                                sizeHeight: 40,
+                                maxLines: 10,
                                 hintText: 'Note',
                                 textController: noteEditingController),
                             CustomSelectColorBuilder(),
@@ -152,7 +154,7 @@ AppBar appBarBuilder(HomeCubit cubit, BuildContext context) {
       actions: [
         IconButton(
           onPressed: () async {
-            Navigator.of(context).pushNamed(AppRoutes.favoriteScreen);
+            Navigator.pushNamed(context, AppRoutes.favoriteScreen);
           },
           icon: const Icon(Icons.favorite, color: Colors.red),
         ),
@@ -493,6 +495,7 @@ class CustomListTile extends StatelessWidget {
   final Color listTileColor;
   final HomeCubit cubit;
   final int index;
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -571,8 +574,21 @@ class CustomListTile extends StatelessWidget {
             const Divider(color: Colors.white),
             const SizedBox(height: 2),
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                IconButton(
+                    onPressed: () async {
+                      await cubit.changeFavorite(
+                          noteId: cubit.notesList[index].noteId.toString(),
+                          isFavoriteOld: cubit.isFavorite =
+                              cubit.notesList[index].isFavorite!);
+                    },
+                    icon: BlocBuilder<HomeCubit, HomeState>(
+                      builder: (context, state) => Icon(Icons.favorite,
+                          color: cubit.notesList[index].isFavorite!
+                              ? Colors.red
+                              : Colors.grey),
+                    )),
                 Text(
                   '${cubit.notesList[index].createdOn?.toDate().year}-${cubit.notesList[index].createdOn?.toDate().month}-${cubit.notesList[index].createdOn?.toDate().day}\n${cubit.notesList[index].createdOn?.toDate().hour}:${cubit.notesList[index].createdOn?.toDate().minute}:${cubit.notesList[index].createdOn?.toDate().second}',
                   maxLines: 2,

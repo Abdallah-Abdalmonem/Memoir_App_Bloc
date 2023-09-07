@@ -8,6 +8,8 @@ class NoteModel {
   String? color;
   Timestamp? createdOn;
   Timestamp? editOn;
+  bool? isFavorite;
+
   NoteModel({
     this.userId,
     this.noteId,
@@ -16,6 +18,7 @@ class NoteModel {
     this.color,
     this.createdOn,
     this.editOn,
+    this.isFavorite,
   }) {
     String tempString = this.color.toString();
     String color = '';
@@ -33,6 +36,7 @@ class NoteModel {
     color = jsonData['color'];
     createdOn = jsonData['createdOn'];
     editOn = jsonData['editOn'];
+    isFavorite = jsonData['isFavorite'];
   }
 
   Map<String, dynamic> toJson() {
@@ -44,6 +48,7 @@ class NoteModel {
       'color': color,
       'createdOn': createdOn,
       'editOn': editOn,
+      'isFavorite': isFavorite,
     };
   }
 }

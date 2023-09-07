@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memoir_app_bloc/features/favorite/favorite_screen.dart';
 import 'package:memoir_app_bloc/features/home/home_screen.dart';
 import 'package:memoir_app_bloc/features/note/note_screen.dart';
 
@@ -12,6 +13,7 @@ class AppRoutes {
   static const String home = '/home';
   static const String imageScreen = '/image_screen';
   static const String noteScreen = '/note_screen';
+  static const String favoriteScreen = '/favorite_screen';
 }
 
 Map<String, Widget Function(BuildContext)> routes = {
@@ -20,6 +22,7 @@ Map<String, Widget Function(BuildContext)> routes = {
   AppRoutes.home: (context) => HomeScreen(),
   AppRoutes.imageScreen: (context) => ImageScreen(),
   AppRoutes.noteScreen: (context) => NoteScreen(),
+  AppRoutes.favoriteScreen: (context) => FavoriteScreen(),
 
   // AppRoutes.confirmation: (context) => ConfirmScreen(),
   // AppRoutes.profile: (context) => ProfileScreen(),

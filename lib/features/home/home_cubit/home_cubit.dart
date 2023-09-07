@@ -46,10 +46,22 @@ class HomeCubit extends Cubit<HomeState> {
 
   UserModel? userModel;
 
+  bool isFavorite = false;
+
+  List<NoteModel> favoriteNoteList = [];
+
   loadUser() async {
     // await getImageProfile();
     // await getUserInformation();
     // await getNotes();
+  }
+
+  changeFavorite({required String noteId, required bool isFavoriteOld}) async {
+    emit(ChangeFavoriteLoading());
+    isFavorite = !isFavoriteOld;
+    await NoteService.editFavoriteNote(isFavorite: isFavorite, noteId: noteId);
+    emit(ChangeFavoriteSuccessfully());
+    await getNotes();
   }
 
   Future<UserModel?> getUserInformation() async {
@@ -87,8 +99,15 @@ class HomeCubit extends Cubit<HomeState> {
     try {
       emit(GetNoteLoading());
       notesList.clear();
+      favoriteNoteList.clear();
       List<NoteModel> response = await NoteService.getNotes();
       notesList = response;
+
+      response
+          .where((element1) => element1.isFavorite == true)
+          .forEach((element2) {
+        favoriteNoteList.add(element2);
+      });
 
       if (response.isNotEmpty) {
         print('get note');
@@ -117,6 +136,7 @@ class HomeCubit extends Cubit<HomeState> {
         note: note,
         color: selectedColor.toString(),
         createdOn: Timestamp.now(),
+        isFavorite: false,
         userId: FirebaseAuth.instance.currentUser?.uid,
       );
       await NoteService.addNote(noteModel: noteModel).then((value) {
@@ -167,6 +187,7 @@ class HomeCubit extends Cubit<HomeState> {
         note: editNote.isEmpty ? oldNoteModel.note : editNote,
         color: editColor.toString(),
         createdOn: oldNoteModel.createdOn,
+        isFavorite: oldNoteModel.isFavorite,
         editOn: Timestamp.now(),
       );
       await NoteService.editNote(

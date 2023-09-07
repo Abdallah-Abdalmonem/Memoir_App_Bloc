@@ -63,7 +63,6 @@ class NoteService {
 
   static Future editNote({
     required NoteModel noteModel,
-    // ممكن استخدم  الموديل اللى بيرجع ماب بدل الموديل وابعته على طول بدل السطر 91
     required String noteId,
   }) async {
     try {
@@ -73,6 +72,21 @@ class NoteService {
           .update(noteModel.toJson());
 
       ToastHelper.toastSuccess(msg: 'edit success');
+    } catch (e) {
+      ToastHelper.toastfailure(msg: e.toString());
+      print(e);
+    }
+  }
+
+  static Future editFavoriteNote({
+    required bool isFavorite,
+    required String noteId,
+  }) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('Note')
+          .doc(noteId)
+          .update({'isFavorite': isFavorite});
     } catch (e) {
       ToastHelper.toastfailure(msg: e.toString());
       print(e);

@@ -91,3 +91,7 @@ class GetUserInformationFailed extends HomeState {
   final String errorMsg;
   GetUserInformationFailed(this.errorMsg);
 }
+
+class ChangeFavoriteLoading extends HomeState {}
+
+class ChangeFavoriteSuccessfully extends HomeState {}
