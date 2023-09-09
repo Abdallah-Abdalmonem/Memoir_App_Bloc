@@ -51,9 +51,9 @@ class HomeCubit extends Cubit<HomeState> {
   List<NoteModel> favoriteNoteList = [];
 
   loadUser() async {
-    // await getImageProfile();
-    // await getUserInformation();
-    // await getNotes();
+    await getImageProfile();
+    await getUserInformation();
+    await getNotes();
   }
 
   changeFavorite({required String noteId, required bool isFavoriteOld}) async {

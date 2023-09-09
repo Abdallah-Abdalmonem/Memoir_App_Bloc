@@ -17,7 +17,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   UserModel? userModel;
 
-  bool obsucre = false;
+  bool obsucre = true;
   Icon eyeIcon = const Icon(
     Icons.remove_red_eye_rounded,
     color: Colors.black,

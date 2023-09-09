@@ -39,7 +39,6 @@ class NoteScreen extends StatelessWidget {
                           color: Colors.white,
                           child: Column(
                             children: [
-                              const Text('Font Size', textScaleFactor: 2),
                               const Spacer(),
                               Column(
                                 children: [
