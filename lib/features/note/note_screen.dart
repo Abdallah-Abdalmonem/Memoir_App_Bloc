@@ -122,7 +122,8 @@ class NoteScreen extends StatelessWidget {
               icon: const Icon(Icons.edit_outlined)),
           IconButton(
               onPressed: () async {
-                await Share.share('Look To My Note!', subject: noteData.note);
+                await Share.share(noteData.note.toString(),
+                    subject: noteData.note);
               },
               icon: const Icon(
                 Icons.share,

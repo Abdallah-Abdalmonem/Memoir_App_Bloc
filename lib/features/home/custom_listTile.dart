@@ -185,7 +185,7 @@ class CustomListTile extends StatelessWidget {
           CustomTextFormField(
             initialValue: cubit.notesList[index].title,
             onChange: (value) {
-              if (value.isEmpty || value == null || value == '') {
+              if (value.isEmpty || value == '') {
                 editTitleEditingController.text =
                     '${cubit.notesList[index].title}';
               } else {
@@ -198,7 +198,7 @@ class CustomListTile extends StatelessWidget {
             maxLines: 10,
             initialValue: cubit.notesList[index].note,
             onChange: (value) {
-              if (value.isEmpty || value == null || value == '') {
+              if (value.isEmpty || value == '') {
                 editNoteEditingController.text =
                     '${cubit.notesList[index].note}';
               } else {
