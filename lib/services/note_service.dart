@@ -92,4 +92,21 @@ class NoteService {
       print(e);
     }
   }
+
+  static Future deleteAllFavoriteNote() async {
+    try {
+      final instance = await FirebaseFirestore.instance;
+      final batch = instance.batch();
+      var collection = instance.collection('Note');
+      var snapshots = await collection.get();
+
+      for (var doc in snapshots.docs) {
+        batch.update(doc.reference, {'isFavorite': false});
+      }
+      await batch.commit();
+    } catch (e) {
+      ToastHelper.toastfailure(msg: e.toString());
+      print(e);
+    }
+  }
 }

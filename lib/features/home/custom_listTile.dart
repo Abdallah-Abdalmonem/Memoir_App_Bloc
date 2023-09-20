@@ -92,7 +92,7 @@ class CustomListTile extends StatelessWidget {
         await cubit.changeFavorite(
             noteId: cubit.notesList[index].noteId.toString(),
             isFavoriteOld: cubit.isFavorite =
-                cubit.notesList[index].isFavorite!);
+                !cubit.notesList[index].isFavorite!);
       },
       icon: BlocBuilder<HomeCubit, HomeState>(
         builder: (context, state) => Icon(
@@ -121,7 +121,7 @@ class CustomListTile extends StatelessWidget {
     return Text('${cubit.notesList[index].note}',
         textAlign: TextAlign.center,
         style: TextStyle(
-          fontSize: 16,
+          fontSize: 14,
           fontWeight: FontWeight.w600,
           letterSpacing: 1,
           wordSpacing: 2,
@@ -137,7 +137,7 @@ class CustomListTile extends StatelessWidget {
       child: Text(
         '${cubit.notesList[index].title}',
         style: TextStyle(
-            fontSize: 20,
+            fontSize: 15,
             fontWeight: FontWeight.w600,
             letterSpacing: 1,
             wordSpacing: 2,

@@ -58,10 +58,22 @@ class HomeCubit extends Cubit<HomeState> {
 
   changeFavorite({required String noteId, required bool isFavoriteOld}) async {
     emit(ChangeFavoriteLoading());
-    isFavorite = !isFavoriteOld;
     await NoteService.editFavoriteNote(isFavorite: isFavorite, noteId: noteId);
+    favoriteNoteList.clear();
     emit(ChangeFavoriteSuccessfully());
     await getNotes();
+  }
+
+  Future deleteFavoriteList() async {
+    if (favoriteNoteList.isNotEmpty) {
+      emit(DeleteFavoriteListLoading());
+      await NoteService.deleteAllFavoriteNote();
+      favoriteNoteList.clear();
+
+      emit(DeleteFavoriteListSuccessfully());
+      await getNotes();
+    } else
+      ToastHelper.toastfailure(msg: 'there are no favorite note');
   }
 
   Future<UserModel?> getUserInformation() async {
@@ -162,11 +174,12 @@ class HomeCubit extends Cubit<HomeState> {
   Future<void> deleteAllNote() async {
     try {
       if (notesList.isNotEmpty) {
+        emit(DeleteNoteLoading());
         await NoteService.deleteAllNote();
         notesList.clear();
         await getNotes();
       } else {
-        ToastHelper.toastfailure(msg: 'There is no notes');
+        ToastHelper.toastfailure(msg: 'There are no notes');
       }
     } catch (e) {
       ToastHelper.toastfailure(msg: e.toString());

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:memoir_app_bloc/features/home/home_cubit/home_cubit.dart';
 import 'package:memoir_app_bloc/features/home/custom_listTile.dart';
+import 'package:memoir_app_bloc/features/widgets/custom_dialog.dart';
 
 import '../../constant/app_image.dart';
 import '../../constant/app_routes.dart';
@@ -86,10 +87,11 @@ class HomeScreen extends StatelessWidget {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Image.asset(AppImage.icon, scale: 2),
+                              Image.asset(AppImage.icon,
+                                  width: 100, height: 100),
                               const SizedBox(height: 5),
                               const Text('There is no notes',
-                                  textScaleFactor: 1.5)
+                                  textScaleFactor: 1.2)
                             ],
                           ),
                         ),
@@ -173,7 +175,31 @@ class HomeScreen extends StatelessWidget {
             onSelected: (value) async {
               switch (value) {
                 case 'deleteAll':
-                  await cubit.deleteAllNote();
+                  showDialog(
+                    barrierDismissible: false,
+                    context: context,
+                    builder: (context) => CustomDialog(
+                      title: 'Are your sure to delete all notes',
+                      confirmFunction: BlocBuilder<HomeCubit, HomeState>(
+                        builder: (context, state) {
+                          if (state is DeleteNoteLoading) {
+                            return const Center(
+                              child: CircularProgressIndicator.adaptive(
+                                backgroundColor: Colors.white,
+                              ),
+                            );
+                          }
+                          return CustomButton(
+                            textButton: 'delete',
+                            onPressed: () async {
+                              await cubit.deleteAllNote();
+                              Navigator.pop(context);
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  );
                   break;
                 case 'refresh_all_data':
                   await cubit.refreshScreen();
@@ -324,12 +350,12 @@ class HomeScreen extends StatelessWidget {
                               const Text(
                                 textScaleFactor: 1.2,
                                 'Name: ',
-                                style: TextStyle(fontSize: 20),
+                                style: TextStyle(fontSize: 16),
                               ),
                               Text(
                                 textScaleFactor: 1.2,
                                 '${cubit.userModel?.displayName ?? cubit.currentUser?.displayName}',
-                                style: const TextStyle(fontSize: 20),
+                                style: const TextStyle(fontSize: 16),
                               ),
                             ],
                           );
@@ -356,12 +382,12 @@ class HomeScreen extends StatelessWidget {
                               const Text(
                                   textScaleFactor: 1.2,
                                   'Email: ',
-                                  style: TextStyle(fontSize: 20)),
+                                  style: TextStyle(fontSize: 16)),
                               Text(
                                 textScaleFactor: 1.2,
                                 '${cubit.userModel?.email ?? cubit.currentUser?.email}',
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 20),
+                                style: const TextStyle(fontSize: 16),
                               )
                             ],
                           );

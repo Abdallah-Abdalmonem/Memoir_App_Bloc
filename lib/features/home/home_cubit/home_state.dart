@@ -41,7 +41,6 @@ class GetNoteFailed extends HomeState {
 }
 
 // edit note
-
 class EditNoteLoading extends HomeState {}
 
 class EditNoteSuccessfully extends HomeState {}
@@ -92,6 +91,12 @@ class GetUserInformationFailed extends HomeState {
   GetUserInformationFailed(this.errorMsg);
 }
 
+//changeFavorite
 class ChangeFavoriteLoading extends HomeState {}
 
 class ChangeFavoriteSuccessfully extends HomeState {}
+
+// delete all favorite list
+class DeleteFavoriteListLoading extends HomeState {}
+
+class DeleteFavoriteListSuccessfully extends HomeState {}
