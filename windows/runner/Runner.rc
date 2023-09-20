@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "memoir_app_bloc" "\0"
+            VALUE "FileDescription", "Memoir" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "memoir_app_bloc" "\0"
+            VALUE "InternalName", "Memoir" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2023 com.example. All rights reserved." "\0"
             VALUE "OriginalFilename", "memoir_app_bloc.exe" "\0"
-            VALUE "ProductName", "memoir_app_bloc" "\0"
+            VALUE "ProductName", "Memoir" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
